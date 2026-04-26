@@ -1,251 +1,1129 @@
 {
   "meta": {
     "total_cases": 200000,
-    "generated_at": "2026-04-22T09:52:38.165662Z",
-    "random_seed": 42,
-    "schema_version": "4.0"
+    "generated_at": "2026-04-25T22:29:34.286020Z",
+    "model_version": "4.0",
+    "training_sample_size": 50000,
+    "validation_sample_size": 200000,
+    "data_version": "1.0"
   },
-  "distributions": {
-    "case_type": {
-      "divorce": 116322,
-      "inheritance": 31822,
-      "property": 27698,
-      "business": 16068,
-      "nri": 8090
+  "global": {
+    "duration": {
+      "min_days": 46,
+      "max_days": 6323,
+      "mean_days": 171.65,
+      "median_days": 111,
+      "10": 46,
+      "25": 68,
+      "30": 76,
+      "40": 92,
+      "50": 111,
+      "60": 135,
+      "70": 169,
+      "75": 192,
+      "80": 221,
+      "90": 320,
+      "std_days": 220.95
     },
-    "city": {
-      "Pune": 25653,
-      "Delhi": 39822,
-      "Hyderabad": 24099,
-      "Ahmedabad": 16240,
-      "Mumbai": 44049,
-      "Bangalore": 32183,
-      "Chennai": 17954
+    "cost": {
+      "min_inr": 20000,
+      "max_inr": 9293500,
+      "mean_inr": 272562.36,
+      "median_inr": 147000,
+      "10": 57000,
+      "25": 89500,
+      "30": 99000,
+      "40": 119500,
+      "50": 147000,
+      "60": 196500,
+      "70": 289500,
+      "75": 344500,
+      "80": 409500,
+      "90": 613500,
+      "std_inr": 340906.05
     },
-    "urgency": {
-      "medium": 89892,
-      "high": 35946,
-      "low": 60247,
-      "critical": 13915
+    "path_distribution": {
+      "collab": 0.5987,
+      "med": 0.3389,
+      "court": 0.0624
     },
-    "recommended_path": {
-      "collab": 119735,
-      "mediation": 67790,
-      "court": 12475
+    "success_rate_overall": 0.7958
+  },
+  "by_case_type": {
+    "divorce": {
+      "count": 116322,
+      "fraction_of_total": 0.5816,
+      "duration": {
+        "p25": 62,
+        "p50": 101,
+        "p75": 178,
+        "mean": 143.0,
+        "std": 129.2
+      },
+      "cost": {
+        "p25": 95500,
+        "p50": 154000,
+        "p75": 330500,
+        "mean": 243253.52,
+        "std": 230597.8
+      },
+      "path_distribution": {
+        "collab": 0.5686,
+        "med": 0.3687,
+        "court": 0.0627
+      },
+      "success_rate": 0.8786,
+      "median_children_count": 1.0,
+      "median_marriage_duration": 9.8,
+      "median_complexity_score": 3.05
+    },
+    "inheritance": {
+      "count": 31822,
+      "fraction_of_total": 0.1591,
+      "duration": {
+        "p25": 67,
+        "p50": 99,
+        "p75": 153,
+        "mean": 162.69,
+        "std": 223.53
+      },
+      "cost": {
+        "p25": 64000,
+        "p50": 94500,
+        "p75": 162000,
+        "mean": 167683.55,
+        "std": 214626.76
+      },
+      "path_distribution": {
+        "collab": 0.7495,
+        "med": 0.1902,
+        "court": 0.0603
+      },
+      "success_rate": 0.8765,
+      "median_children_count": 0.0,
+      "median_marriage_duration": 0.0,
+      "median_complexity_score": 2.43
+    },
+    "property": {
+      "count": 27698,
+      "fraction_of_total": 0.1385,
+      "duration": {
+        "p25": 73,
+        "p50": 108,
+        "p75": 159,
+        "mean": 172.69,
+        "std": 244.01
+      },
+      "cost": {
+        "p25": 78000,
+        "p50": 114500,
+        "p75": 173500,
+        "mean": 188693.39,
+        "std": 238150.37
+      },
+      "path_distribution": {
+        "collab": 0.8014,
+        "med": 0.1409,
+        "court": 0.0577
+      },
+      "success_rate": 0.8747,
+      "median_children_count": 0.0,
+      "median_marriage_duration": 0.0,
+      "median_complexity_score": 2.28
+    },
+    "business": {
+      "count": 16068,
+      "fraction_of_total": 0.0803,
+      "duration": {
+        "p25": 115,
+        "p50": 176,
+        "p75": 254,
+        "mean": 220.67,
+        "std": 202.18
+      },
+      "cost": {
+        "p25": 188500,
+        "p50": 343000,
+        "p75": 572000,
+        "mean": 419596.53,
+        "std": 316924.83
+      },
+      "path_distribution": {
+        "med": 0.5431,
+        "collab": 0.3982,
+        "court": 0.0588
+      },
+      "success_rate": 0.2895,
+      "median_children_count": 0.0,
+      "median_marriage_duration": 0.0,
+      "median_complexity_score": 3.66
+    },
+    "nri": {
+      "count": 8090,
+      "fraction_of_total": 0.0404,
+      "duration": {
+        "p25": 253,
+        "p50": 363,
+        "p75": 507,
+        "mean": 517.99,
+        "std": 590.32
+      },
+      "cost": {
+        "p25": 576000,
+        "p50": 927250,
+        "p75": 1333375,
+        "mean": 1101632.2,
+        "std": 850680.42
+      },
+      "path_distribution": {
+        "med": 0.7685,
+        "collab": 0.1419,
+        "court": 0.0896
+      },
+      "success_rate": 0.023,
+      "median_children_count": 0.0,
+      "median_marriage_duration": 0.0,
+      "median_complexity_score": 4.66
     }
   },
-  "outcome_stats": {
-    "collab": {
-      "duration_days": {
-        "mean": 93.26,
-        "std": 49.2,
-        "median": 82.0,
-        "p25": 55.0,
-        "p75": 115.0,
-        "p10": 46.0,
-        "p90": 154.0,
-        "min": 46.0,
-        "max": 738.0
+  "by_city": {
+    "mumbai": {
+      "count": 44049,
+      "duration": {
+        "p25": 78,
+        "p50": 128,
+        "p75": 220
       },
-      "cost_inr": {
-        "mean": 126865.07,
-        "std": 87491.97,
-        "median": 110000.0,
-        "p25": 75500.0,
-        "p75": 154000.0,
-        "p10": 48000.0,
-        "p90": 212500.0,
-        "min": 20000.0,
-        "max": 1531500.0
-      }
+      "cost": {
+        "p25": 102500,
+        "p50": 176000,
+        "p75": 409000
+      },
+      "court_backlog_months": 18,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.7768
     },
-    "mediation": {
-      "duration_days": {
-        "mean": 192.59,
-        "std": 89.85,
-        "median": 176.0,
-        "p25": 132.0,
-        "p75": 233.0,
-        "p10": 101.0,
-        "p90": 300.0,
-        "min": 47.0,
-        "max": 1495.0
+    "delhi": {
+      "count": 39822,
+      "duration": {
+        "p25": 76,
+        "p50": 123,
+        "p75": 213
       },
-      "cost_inr": {
-        "mean": 346558.85,
-        "std": 220776.86,
-        "median": 296000.0,
-        "p25": 217000.0,
-        "p75": 407500.0,
-        "p10": 163000.0,
-        "p90": 562000.0,
-        "min": 20500.0,
-        "max": 4221500.0
-      }
+      "cost": {
+        "p25": 100000,
+        "p50": 169000,
+        "p75": 394000
+      },
+      "court_backlog_months": 16.5,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.7829
+    },
+    "bangalore": {
+      "count": 32183,
+      "duration": {
+        "p25": 68,
+        "p50": 109,
+        "p75": 187
+      },
+      "cost": {
+        "p25": 84500,
+        "p50": 137500,
+        "p75": 323500
+      },
+      "court_backlog_months": 13,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.7958
+    },
+    "pune": {
+      "count": 25653,
+      "duration": {
+        "p25": 65,
+        "p50": 104,
+        "p75": 178
+      },
+      "cost": {
+        "p25": 83000,
+        "p50": 131500,
+        "p75": 304000
+      },
+      "court_backlog_months": 11,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.8071
+    },
+    "hyderabad": {
+      "count": 24099,
+      "duration": {
+        "p25": 65,
+        "p50": 104,
+        "p75": 175
+      },
+      "cost": {
+        "p25": 81500,
+        "p50": 129500,
+        "p75": 298000
+      },
+      "court_backlog_months": 10.5,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.8097
+    },
+    "chennai": {
+      "count": 17954,
+      "duration": {
+        "p25": 59,
+        "p50": 93,
+        "p75": 158
+      },
+      "cost": {
+        "p25": 81000,
+        "p50": 129000,
+        "p75": 289000
+      },
+      "court_backlog_months": 9,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.8141
+    },
+    "ahmedabad": {
+      "count": 16240,
+      "duration": {
+        "p25": 58,
+        "p50": 91,
+        "p75": 153
+      },
+      "cost": {
+        "p25": 81500,
+        "p50": 126000,
+        "p75": 277000
+      },
+      "court_backlog_months": 8.5,
+      "most_common_case_type": "divorce",
+      "success_rate": 0.8201
+    }
+  },
+  "by_path": {
+    "collab": {
+      "count": 119735,
+      "duration": {
+        "p25": 52,
+        "p50": 77,
+        "p75": 106,
+        "mean": 85.19
+      },
+      "cost": {
+        "p25": 69000,
+        "p50": 99000,
+        "p75": 133500,
+        "mean": 106440.72
+      },
+      "success_rate": 0.9736,
+      "most_common_case_type": "divorce"
+    },
+    "med": {
+      "count": 67790,
+      "duration": {
+        "p25": 148,
+        "p50": 198,
+        "p75": 266,
+        "mean": 219.78
+      },
+      "cost": {
+        "p25": 263500,
+        "p50": 367500,
+        "p75": 519500,
+        "mean": 438450.31
+      },
+      "success_rate": 0.5855,
+      "most_common_case_type": "divorce"
     },
     "court": {
-      "duration_days": {
-        "mean": 708.23,
-        "std": 471.19,
-        "median": 572.0,
-        "p25": 393.0,
-        "p75": 893.0,
-        "p10": 284.0,
-        "p90": 1299.0,
-        "min": 52.0,
-        "max": 6323.0
+      "count": 12475,
+      "duration": {
+        "p25": 392,
+        "p50": 577,
+        "p75": 921,
+        "mean": 739.95
       },
-      "cost_inr": {
-        "mean": 909270.92,
-        "std": 557882.35,
-        "median": 781500.0,
-        "p25": 574000.0,
-        "p75": 1077000.0,
-        "p10": 432000.0,
-        "p90": 1472000.0,
-        "min": 78000.0,
-        "max": 9293500.0
-      }
+      "cost": {
+        "p25": 576500,
+        "p50": 788000,
+        "p75": 1105500,
+        "mean": 965550.86
+      },
+      "success_rate": 0.2318,
+      "most_common_case_type": "divorce"
     }
   },
-  "risk_score_stats": {
-    "mean": 43.82,
-    "std": 15.55,
-    "median": 42.0,
-    "p25": 32.0,
-    "p75": 54.0,
-    "p10": 25.0,
-    "p90": 65.0,
-    "min": 7.0,
-    "max": 95.0
-  },
-  "city_backlogs": {
-    "Mumbai": 18.0,
-    "Delhi": 16.5,
-    "Bangalore": 13.0,
-    "Pune": 11.0,
-    "Hyderabad": 10.5,
-    "Chennai": 9.0,
-    "Ahmedabad": 8.5
-  },
-  "filing_season": {
-    "1": 1.2,
-    "2": 1.05,
-    "3": 1.0,
-    "4": 1.0,
-    "5": 1.0,
-    "6": 0.95,
-    "7": 0.95,
-    "8": 1.0,
-    "9": 1.05,
-    "10": 1.0,
-    "11": 0.75,
-    "12": 0.65
-  },
-  "validation": {
-    "case_type": {
-      "divorce": {
-        "expected": 0.58,
-        "actual": 0.5816,
-        "diff": 0.0016,
-        "pass": true
+  "by_city_and_type": {
+    "pune_divorce": {
+      "count": 14909,
+      "duration": {
+        "p25": 60,
+        "p50": 95,
+        "p75": 164
       },
-      "inheritance": {
-        "expected": 0.16,
-        "actual": 0.1591,
-        "diff": 0.0009,
-        "pass": true
+      "cost": {
+        "p25": 88000,
+        "p50": 137000,
+        "p75": 293000
       },
-      "property": {
-        "expected": 0.14,
-        "actual": 0.1385,
-        "diff": 0.0015,
-        "pass": true
+      "path_distribution": {
+        "collab": 0.5996,
+        "med": 0.3342,
+        "court": 0.0662
       },
-      "business": {
-        "expected": 0.08,
-        "actual": 0.0803,
-        "diff": 0.0003,
-        "pass": true
-      },
-      "nri": {
-        "expected": 0.04,
-        "actual": 0.0404,
-        "diff": 0.0004,
-        "pass": true
-      }
+      "success_rate": 0.8876
     },
-    "city": {
-      "Mumbai": {
-        "expected": 0.22,
-        "actual": 0.2202,
-        "diff": 0.0002,
-        "pass": true
+    "delhi_divorce": {
+      "count": 23056,
+      "duration": {
+        "p25": 69,
+        "p50": 113,
+        "p75": 196
       },
-      "Delhi": {
-        "expected": 0.2,
-        "actual": 0.1991,
-        "diff": 0.0009,
-        "pass": true
+      "cost": {
+        "p25": 108000,
+        "p50": 176500,
+        "p75": 372500
       },
-      "Bangalore": {
-        "expected": 0.16,
-        "actual": 0.1609,
-        "diff": 0.0009,
-        "pass": true
+      "path_distribution": {
+        "collab": 0.5434,
+        "med": 0.3937,
+        "court": 0.0629
       },
-      "Pune": {
-        "expected": 0.13,
-        "actual": 0.1283,
-        "diff": 0.0017,
-        "pass": true
-      },
-      "Hyderabad": {
-        "expected": 0.12,
-        "actual": 0.1205,
-        "diff": 0.0005,
-        "pass": true
-      },
-      "Chennai": {
-        "expected": 0.09,
-        "actual": 0.0898,
-        "diff": 0.0002,
-        "pass": true
-      },
-      "Ahmedabad": {
-        "expected": 0.08,
-        "actual": 0.0812,
-        "diff": 0.0012,
-        "pass": true
-      }
+      "success_rate": 0.8707
     },
-    "urgency": {
-      "low": {
-        "expected": 0.3,
-        "actual": 0.3012,
-        "diff": 0.0012,
-        "pass": true
+    "hyderabad_divorce": {
+      "count": 14130,
+      "duration": {
+        "p25": 59,
+        "p50": 95,
+        "p75": 162
       },
-      "medium": {
-        "expected": 0.45,
-        "actual": 0.4495,
-        "diff": 0.0005,
-        "pass": true
+      "cost": {
+        "p25": 87500,
+        "p50": 135500,
+        "p75": 289000
       },
-      "high": {
-        "expected": 0.18,
-        "actual": 0.1797,
-        "diff": 0.0003,
-        "pass": true
+      "path_distribution": {
+        "med": 0.3387,
+        "collab": 0.5999,
+        "court": 0.0614
       },
-      "critical": {
-        "expected": 0.07,
-        "actual": 0.0696,
-        "diff": 0.0004,
-        "pass": true
-      }
+      "success_rate": 0.889
     },
-    "all_pass": true,
-    "validation_failed": 0
+    "delhi_inheritance": {
+      "count": 6423,
+      "duration": {
+        "p25": 73,
+        "p50": 109,
+        "p75": 170
+      },
+      "cost": {
+        "p25": 70750,
+        "p50": 105500,
+        "p75": 197000
+      },
+      "path_distribution": {
+        "collab": 0.7243,
+        "med": 0.2121,
+        "court": 0.0637
+      },
+      "success_rate": 0.8653
+    },
+    "ahmedabad_inheritance": {
+      "count": 2551,
+      "duration": {
+        "p25": 58,
+        "p50": 84,
+        "p75": 125
+      },
+      "cost": {
+        "p25": 57500,
+        "p50": 86000,
+        "p75": 130000
+      },
+      "path_distribution": {
+        "collab": 0.7828,
+        "court": 0.0627,
+        "med": 0.1544
+      },
+      "success_rate": 0.8871
+    },
+    "mumbai_divorce": {
+      "count": 25680,
+      "duration": {
+        "p25": 72,
+        "p50": 119,
+        "p75": 203
+      },
+      "cost": {
+        "p25": 110500,
+        "p50": 187000,
+        "p75": 388000
+      },
+      "path_distribution": {
+        "med": 0.4218,
+        "collab": 0.5161,
+        "court": 0.0621
+      },
+      "success_rate": 0.8644
+    },
+    "hyderabad_property": {
+      "count": 3248,
+      "duration": {
+        "p25": 71,
+        "p50": 105,
+        "p75": 149
+      },
+      "cost": {
+        "p25": 70000,
+        "p50": 104000,
+        "p75": 152500
+      },
+      "path_distribution": {
+        "collab": 0.819,
+        "court": 0.0551,
+        "med": 0.1259
+      },
+      "success_rate": 0.8861
+    },
+    "ahmedabad_business": {
+      "count": 1305,
+      "duration": {
+        "p25": 90,
+        "p50": 133,
+        "p75": 202
+      },
+      "cost": {
+        "p25": 154500,
+        "p50": 244500,
+        "p75": 452500
+      },
+      "path_distribution": {
+        "med": 0.4023,
+        "collab": 0.5356,
+        "court": 0.0621
+      },
+      "success_rate": 0.387
+    },
+    "bangalore_nri": {
+      "count": 1321,
+      "duration": {
+        "p25": 253,
+        "p50": 358,
+        "p75": 484
+      },
+      "cost": {
+        "p25": 546000,
+        "p50": 896500,
+        "p75": 1250500
+      },
+      "path_distribution": {
+        "med": 0.7737,
+        "court": 0.0871,
+        "collab": 0.1393
+      },
+      "success_rate": 0.022
+    },
+    "mumbai_property": {
+      "count": 6121,
+      "duration": {
+        "p25": 80,
+        "p50": 121,
+        "p75": 184
+      },
+      "cost": {
+        "p25": 87500,
+        "p50": 132000,
+        "p75": 207500
+      },
+      "path_distribution": {
+        "collab": 0.7713,
+        "med": 0.1704,
+        "court": 0.0583
+      },
+      "success_rate": 0.8557
+    },
+    "bangalore_inheritance": {
+      "count": 5126,
+      "duration": {
+        "p25": 66,
+        "p50": 97,
+        "p75": 146
+      },
+      "cost": {
+        "p25": 59500,
+        "p50": 88000,
+        "p75": 142875
+      },
+      "path_distribution": {
+        "med": 0.1896,
+        "collab": 0.7571,
+        "court": 0.0533
+      },
+      "success_rate": 0.8863
+    },
+    "bangalore_divorce": {
+      "count": 18602,
+      "duration": {
+        "p25": 61,
+        "p50": 99,
+        "p75": 173
+      },
+      "cost": {
+        "p25": 90500,
+        "p50": 144500,
+        "p75": 310500
+      },
+      "path_distribution": {
+        "med": 0.3732,
+        "collab": 0.5654,
+        "court": 0.0614
+      },
+      "success_rate": 0.8783
+    },
+    "chennai_divorce": {
+      "count": 10378,
+      "duration": {
+        "p25": 53,
+        "p50": 84,
+        "p75": 146
+      },
+      "cost": {
+        "p25": 86500,
+        "p50": 134000,
+        "p75": 275875
+      },
+      "path_distribution": {
+        "collab": 0.6196,
+        "med": 0.318,
+        "court": 0.0624
+      },
+      "success_rate": 0.8915
+    },
+    "bangalore_property": {
+      "count": 4531,
+      "duration": {
+        "p25": 74,
+        "p50": 109,
+        "p75": 156
+      },
+      "cost": {
+        "p25": 73000,
+        "p50": 109000,
+        "p75": 161750
+      },
+      "path_distribution": {
+        "collab": 0.7978,
+        "med": 0.1406,
+        "court": 0.0616
+      },
+      "success_rate": 0.8738
+    },
+    "ahmedabad_divorce": {
+      "count": 9567,
+      "duration": {
+        "p25": 52,
+        "p50": 83,
+        "p75": 143
+      },
+      "cost": {
+        "p25": 87000,
+        "p50": 131000,
+        "p75": 275000
+      },
+      "path_distribution": {
+        "collab": 0.6265,
+        "med": 0.3108,
+        "court": 0.0627
+      },
+      "success_rate": 0.8931
+    },
+    "mumbai_business": {
+      "count": 3481,
+      "duration": {
+        "p25": 138,
+        "p50": 205,
+        "p75": 289
+      },
+      "cost": {
+        "p25": 244000,
+        "p50": 450000,
+        "p75": 671500
+      },
+      "path_distribution": {
+        "med": 0.6265,
+        "collab": 0.3077,
+        "court": 0.0658
+      },
+      "success_rate": 0.2157
+    },
+    "mumbai_inheritance": {
+      "count": 7035,
+      "duration": {
+        "p25": 75,
+        "p50": 109,
+        "p75": 182
+      },
+      "cost": {
+        "p25": 74000,
+        "p50": 110000,
+        "p75": 210500
+      },
+      "path_distribution": {
+        "med": 0.2287,
+        "collab": 0.7116,
+        "court": 0.0597
+      },
+      "success_rate": 0.8527
+    },
+    "pune_inheritance": {
+      "count": 4033,
+      "duration": {
+        "p25": 65,
+        "p50": 95,
+        "p75": 141
+      },
+      "cost": {
+        "p25": 59500,
+        "p50": 86500,
+        "p75": 138500
+      },
+      "path_distribution": {
+        "collab": 0.7706,
+        "court": 0.0612,
+        "med": 0.1681
+      },
+      "success_rate": 0.8869
+    },
+    "delhi_property": {
+      "count": 5476,
+      "duration": {
+        "p25": 79,
+        "p50": 117,
+        "p75": 173
+      },
+      "cost": {
+        "p25": 86500,
+        "p50": 127000,
+        "p75": 194500
+      },
+      "path_distribution": {
+        "court": 0.0562,
+        "collab": 0.7887,
+        "med": 0.155
+      },
+      "success_rate": 0.8676
+    },
+    "bangalore_business": {
+      "count": 2603,
+      "duration": {
+        "p25": 114,
+        "p50": 171,
+        "p75": 246
+      },
+      "cost": {
+        "p25": 179000,
+        "p50": 325000,
+        "p75": 532000
+      },
+      "path_distribution": {
+        "med": 0.5509,
+        "court": 0.0546,
+        "collab": 0.3945
+      },
+      "success_rate": 0.2847
+    },
+    "chennai_inheritance": {
+      "count": 2847,
+      "duration": {
+        "p25": 58,
+        "p50": 84,
+        "p75": 125
+      },
+      "cost": {
+        "p25": 58500,
+        "p50": 86500,
+        "p75": 137500
+      },
+      "path_distribution": {
+        "collab": 0.7787,
+        "med": 0.1567,
+        "court": 0.0646
+      },
+      "success_rate": 0.8985
+    },
+    "pune_property": {
+      "count": 3598,
+      "duration": {
+        "p25": 69,
+        "p50": 101,
+        "p75": 147
+      },
+      "cost": {
+        "p25": 75500,
+        "p50": 107000,
+        "p75": 153500
+      },
+      "path_distribution": {
+        "collab": 0.8224,
+        "court": 0.0589,
+        "med": 0.1187
+      },
+      "success_rate": 0.8855
+    },
+    "ahmedabad_property": {
+      "count": 2209,
+      "duration": {
+        "p25": 62,
+        "p50": 94,
+        "p75": 132
+      },
+      "cost": {
+        "p25": 72000,
+        "p50": 104500,
+        "p75": 148500
+      },
+      "path_distribution": {
+        "collab": 0.833,
+        "court": 0.0539,
+        "med": 0.1132
+      },
+      "success_rate": 0.8986
+    },
+    "mumbai_nri": {
+      "count": 1732,
+      "duration": {
+        "p25": 286,
+        "p50": 404,
+        "p75": 562
+      },
+      "cost": {
+        "p25": 675375,
+        "p50": 1072500,
+        "p75": 1498000
+      },
+      "path_distribution": {
+        "med": 0.787,
+        "collab": 0.1155,
+        "court": 0.0976
+      },
+      "success_rate": 0.0185
+    },
+    "hyderabad_inheritance": {
+      "count": 3807,
+      "duration": {
+        "p25": 62,
+        "p50": 93,
+        "p75": 137
+      },
+      "cost": {
+        "p25": 58500,
+        "p50": 86000,
+        "p75": 132500
+      },
+      "path_distribution": {
+        "collab": 0.7854,
+        "court": 0.0594,
+        "med": 0.1552
+      },
+      "success_rate": 0.8918
+    },
+    "delhi_nri": {
+      "count": 1684,
+      "duration": {
+        "p25": 287,
+        "p50": 403,
+        "p75": 556
+      },
+      "cost": {
+        "p25": 680000,
+        "p50": 1038750,
+        "p75": 1439500
+      },
+      "path_distribution": {
+        "collab": 0.0968,
+        "court": 0.0909,
+        "med": 0.8124
+      },
+      "success_rate": 0.0137
+    },
+    "chennai_business": {
+      "count": 1465,
+      "duration": {
+        "p25": 97,
+        "p50": 143,
+        "p75": 204
+      },
+      "cost": {
+        "p25": 157000,
+        "p50": 268500,
+        "p75": 476000
+      },
+      "path_distribution": {
+        "collab": 0.486,
+        "med": 0.4621,
+        "court": 0.0519
+      },
+      "success_rate": 0.3761
+    },
+    "delhi_business": {
+      "count": 3183,
+      "duration": {
+        "p25": 135,
+        "p50": 198,
+        "p75": 278
+      },
+      "cost": {
+        "p25": 227500,
+        "p50": 420000,
+        "p75": 655500
+      },
+      "path_distribution": {
+        "collab": 0.334,
+        "med": 0.6085,
+        "court": 0.0575
+      },
+      "success_rate": 0.2422
+    },
+    "chennai_nri": {
+      "count": 749,
+      "duration": {
+        "p25": 218,
+        "p50": 313,
+        "p75": 447
+      },
+      "cost": {
+        "p25": 494000,
+        "p50": 826000,
+        "p75": 1235000
+      },
+      "path_distribution": {
+        "med": 0.7196,
+        "court": 0.0948,
+        "collab": 0.1856
+      },
+      "success_rate": 0.0347
+    },
+    "ahmedabad_nri": {
+      "count": 608,
+      "duration": {
+        "p25": 210,
+        "p50": 318,
+        "p75": 443
+      },
+      "cost": {
+        "p25": 484500,
+        "p50": 799500,
+        "p75": 1185625
+      },
+      "path_distribution": {
+        "med": 0.722,
+        "collab": 0.2056,
+        "court": 0.0724
+      },
+      "success_rate": 0.0362
+    },
+    "chennai_property": {
+      "count": 2515,
+      "duration": {
+        "p25": 63,
+        "p50": 93,
+        "p75": 132
+      },
+      "cost": {
+        "p25": 72000,
+        "p50": 105500,
+        "p75": 150750
+      },
+      "path_distribution": {
+        "collab": 0.8282,
+        "court": 0.0573,
+        "med": 0.1145
+      },
+      "success_rate": 0.8867
+    },
+    "pune_nri": {
+      "count": 1032,
+      "duration": {
+        "p25": 238,
+        "p50": 352,
+        "p75": 491
+      },
+      "cost": {
+        "p25": 542000,
+        "p50": 853500,
+        "p75": 1241125
+      },
+      "path_distribution": {
+        "med": 0.7481,
+        "collab": 0.157,
+        "court": 0.095
+      },
+      "success_rate": 0.0291
+    },
+    "hyderabad_business": {
+      "count": 1950,
+      "duration": {
+        "p25": 106,
+        "p50": 162,
+        "p75": 237
+      },
+      "cost": {
+        "p25": 162000,
+        "p50": 276000,
+        "p75": 498875
+      },
+      "path_distribution": {
+        "med": 0.4733,
+        "collab": 0.4682,
+        "court": 0.0585
+      },
+      "success_rate": 0.3354
+    },
+    "pune_business": {
+      "count": 2081,
+      "duration": {
+        "p25": 107,
+        "p50": 163,
+        "p75": 237
+      },
+      "cost": {
+        "p25": 174000,
+        "p50": 298000,
+        "p75": 504500
+      },
+      "path_distribution": {
+        "med": 0.5041,
+        "collab": 0.4387,
+        "court": 0.0572
+      },
+      "success_rate": 0.3263
+    },
+    "hyderabad_nri": {
+      "count": 964,
+      "duration": {
+        "p25": 230,
+        "p50": 331,
+        "p75": 480
+      },
+      "cost": {
+        "p25": 493250,
+        "p50": 811750,
+        "p75": 1173500
+      },
+      "path_distribution": {
+        "med": 0.7407,
+        "court": 0.0778,
+        "collab": 0.1815
+      },
+      "success_rate": 0.0249
+    }
+  },
+  "complexity_brackets": {
+    "low": {
+      "range": [
+        0,
+        3.3
+      ],
+      "median_duration": 84,
+      "median_cost": 106000,
+      "count": 123120
+    },
+    "medium": {
+      "range": [
+        3.3,
+        6.6
+      ],
+      "median_duration": 191,
+      "median_cost": 354000,
+      "count": 76515
+    },
+    "high": {
+      "range": [
+        6.6,
+        10.0
+      ],
+      "median_duration": 1591,
+      "median_cost": 2559500,
+      "count": 365
+    }
+  },
+  "urgency_impact": {
+    "low": {
+      "median_duration_delta": -6,
+      "description": "Low urgency allows collaborative resolution"
+    },
+    "medium": {
+      "median_duration_delta": -6,
+      "description": "Medium urgency \u2014 standard timeline applies"
+    },
+    "high": {
+      "median_duration_delta": 13,
+      "description": "High urgency accelerates filing, compresses negotiation"
+    },
+    "critical": {
+      "median_duration_delta": 36,
+      "description": "Critical urgency requires immediate legal action"
+    }
+  },
+  "children_impact": {
+    "none": {
+      "median_duration_delta": 0,
+      "description": "No custody terms to negotiate"
+    },
+    "one": {
+      "median_duration_delta": -6,
+      "description": "Single custody arrangement adds -6 days on average"
+    },
+    "two": {
+      "median_duration_delta": 14,
+      "description": "Multiple custody terms extend negotiation phase"
+    },
+    "three": {
+      "median_duration_delta": 39,
+      "description": "Complex custody arrangement \u2014 consider mediation"
+    }
+  },
+  "business_impact": {
+    "no_business": {
+      "median_duration_delta": 0,
+      "description": "No business valuation required"
+    },
+    "with_business": {
+      "median_duration_delta": 94,
+      "cost_delta_inr": 234500,
+      "description": "Business valuation adds time and specialist cost"
+    }
+  },
+  "model_performance": {
+    "outcome_collab_duration_mae": 28.491,
+    "outcome_med_duration_mae": 48.6515,
+    "outcome_court_duration_mae": 209.851,
+    "path_recommender_accuracy": 0.8582,
+    "risk_scorer_mae": 0.6074,
+    "calibration_max_deviation": 0.0327,
+    "training_cases": 50000,
+    "validation_cases": 200000
+  },
+  "percentile_lookup": {
+    "duration_percentiles": {
+      "30": 76,
+      "40": 92,
+      "50": 111,
+      "60": 135,
+      "70": 169,
+      "80": 221,
+      "90": 320
+    },
+    "cost_percentiles": {
+      "30": 99000,
+      "40": 119500,
+      "50": 147000,
+      "60": 196500,
+      "70": 289500,
+      "80": 409500,
+      "90": 613500
+    }
   }
 }

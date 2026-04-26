@@ -1,0 +1,237 @@
+{
+  "phase": "1.3",
+  "status": "PASS",
+  "timestamp": "2026-04-25T22:23:11.155021Z",
+  "blocks": {
+    "1_file_count": "PASS",
+    "2_load_integrity": "PASS",
+    "3_query_speed": "PASS",
+    "4_meera_e2e": "PASS",
+    "5_js_parity": "PASS",
+    "6_git_size": "PASS"
+  },
+  "ready_to_commit": true,
+  "total_cases_indexed": 40000,
+  "speed_stats": {
+    "min_ms": 0.048300003982149065,
+    "median_ms": 0.06120000034570694,
+    "max_ms": 0.32159999682335183,
+    "all_under_5ms": true
+  },
+  "meera_result": {
+    "status": "ok",
+    "index": "knn_pune_divorce",
+    "k": 20,
+    "results": [
+      {
+        "case_id": "e2044e9f-025b-4e36-a4c1-9e19f371562b",
+        "duration_days": 55,
+        "cost_inr": 96000,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 1,
+        "distance": 0.2513302705082462
+      },
+      {
+        "case_id": "6b7e5fda-82c2-428e-bf62-f038042d4159",
+        "duration_days": 48,
+        "cost_inr": 113500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 2,
+        "distance": 0.2551283300216705
+      },
+      {
+        "case_id": "60e51fbe-c07f-4b32-84c3-fc176423524e",
+        "duration_days": 82,
+        "cost_inr": 111500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 3,
+        "distance": 0.25814485502683643
+      },
+      {
+        "case_id": "fd9ae45a-8b3d-4d36-93f2-da4abaa3c0fa",
+        "duration_days": 83,
+        "cost_inr": 46000,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 4,
+        "distance": 0.2595753138698658
+      },
+      {
+        "case_id": "77ac9ac8-ac1f-4ddc-939a-c95912cf6632",
+        "duration_days": 91,
+        "cost_inr": 28500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 5,
+        "distance": 0.26237380718437003
+      },
+      {
+        "case_id": "7f0c711a-5e0e-4c00-91e5-bfc9c1b32652",
+        "duration_days": 92,
+        "cost_inr": 158500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 6,
+        "distance": 0.26725613659341013
+      },
+      {
+        "case_id": "810b2ba7-f7b1-49d8-9a9e-3488009d6f79",
+        "duration_days": 46,
+        "cost_inr": 48500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 7,
+        "distance": 0.26985013806011215
+      },
+      {
+        "case_id": "dfe039b8-0b0d-4327-92cc-8b9350b1bbfa",
+        "duration_days": 159,
+        "cost_inr": 191500,
+        "path_taken": "mediation",
+        "success": true,
+        "key_factor": "Mediation required extended negotiation",
+        "rank": 8,
+        "distance": 0.2701316826196392
+      },
+      {
+        "case_id": "371df88c-a718-486f-8f98-fd4922c1bcd6",
+        "duration_days": 201,
+        "cost_inr": 137000,
+        "path_taken": "mediation",
+        "success": true,
+        "key_factor": "Mediation required extended negotiation",
+        "rank": 9,
+        "distance": 0.27208338765152373
+      },
+      {
+        "case_id": "dfd0f4cb-47c4-4b90-9247-11b26fc2af9c",
+        "duration_days": 146,
+        "cost_inr": 532000,
+        "path_taken": "mediation",
+        "success": true,
+        "key_factor": "Mediation required extended negotiation",
+        "rank": 10,
+        "distance": 0.2724894311674184
+      },
+      {
+        "case_id": "bd956d8b-bc10-412d-bc70-4b430f79f4e7",
+        "duration_days": 58,
+        "cost_inr": 81500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 11,
+        "distance": 0.2751126737897591
+      },
+      {
+        "case_id": "f825aaae-f309-4d2b-94ec-d5ffc28c79b8",
+        "duration_days": 46,
+        "cost_inr": 131000,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 12,
+        "distance": 0.27864141539435505
+      },
+      {
+        "case_id": "af1be407-b5c3-40a3-8338-b3ac508f779f",
+        "duration_days": 76,
+        "cost_inr": 46000,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 13,
+        "distance": 0.2791510334040476
+      },
+      {
+        "case_id": "aa2357ab-6416-474c-8906-d3a7b843263a",
+        "duration_days": 46,
+        "cost_inr": 51500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 14,
+        "distance": 0.27997874632196834
+      },
+      {
+        "case_id": "5ef8c96f-7f7a-449a-bb95-4768a4dfb2ea",
+        "duration_days": 46,
+        "cost_inr": 75000,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 15,
+        "distance": 0.28317941932632645
+      },
+      {
+        "case_id": "a23f3c67-ef68-402f-b02d-ba2749208232",
+        "duration_days": 311,
+        "cost_inr": 453500,
+        "path_taken": "mediation",
+        "success": true,
+        "key_factor": "Mediation required extended negotiation",
+        "rank": 16,
+        "distance": 0.28394302382742226
+      },
+      {
+        "case_id": "ae1b070d-8dc7-40c3-b3af-911eaf518ca6",
+        "duration_days": 93,
+        "cost_inr": 135500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 17,
+        "distance": 0.28761862234093594
+      },
+      {
+        "case_id": "3763c638-e2fe-46c5-b82a-e86f5d8f5ca9",
+        "duration_days": 101,
+        "cost_inr": 86500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 18,
+        "distance": 0.2880099133250959
+      },
+      {
+        "case_id": "45b0820c-db9b-45fe-9a5b-90c38c77568f",
+        "duration_days": 562,
+        "cost_inr": 575500,
+        "path_taken": "court",
+        "success": false,
+        "key_factor": "Full court proceedings \u2014 562 days",
+        "rank": 19,
+        "distance": 0.2881352317324928
+      },
+      {
+        "case_id": "59faacbe-599a-466f-8a4a-dfe79365d51e",
+        "duration_days": 88,
+        "cost_inr": 127500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 20,
+        "distance": 0.2883477539088704
+      }
+    ],
+    "stats": {
+      "median_duration_days": 85,
+      "median_cost_inr": 112500,
+      "most_common_path": "collab",
+      "success_rate": 0.95,
+      "custody_insight": "Custody terms were resolved within the standard timeline in most cases similar to yours."
+    },
+    "query_time_ms": 2.66
+  },
+  "knn_indexes_size_mb": 5.849133491516113
+}

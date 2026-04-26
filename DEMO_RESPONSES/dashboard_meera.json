@@ -1,0 +1,143 @@
+{
+  "demo_id": "meera_dashboard_v4",
+  "case_id": "CASE_MEERA_DEMO_001",
+  "case_status": "active",
+  "day_number": 12,
+  "current_phase": "documentation",
+  "professionals": [
+    {
+      "id": "PROF_001",
+      "name": "Adv. Priya Sharma",
+      "role": "lawyer",
+      "status": "active",
+      "status_bar_color": "#3D5A80",
+      "current_task": "Reviewing draft petition",
+      "task_due": "2025-03-22T17:00:00Z",
+      "trust_score": 87,
+      "last_update": "2025-03-26T09:15:00Z",
+      "last_update_text": "Petition draft ready for review \u2014 3 minor edits needed"
+    },
+    {
+      "id": "PROF_002",
+      "name": "CA Rajesh Nair",
+      "role": "chartered_accountant",
+      "status": "working",
+      "status_bar_color": "#D97706",
+      "status_pulse": true,
+      "current_task": "Compiling joint account statements \u2014 last 3 years",
+      "task_due": "2025-03-28T17:00:00Z",
+      "trust_score": 92,
+      "last_update": "2025-03-26T11:30:00Z",
+      "last_update_text": "Statements for 2022\u20132024 received. 2021 pending from bank."
+    },
+    {
+      "id": "PROF_003",
+      "name": "Dr. Sonal Mehta",
+      "role": "therapist",
+      "status": "active",
+      "status_bar_color": "#3D5A80",
+      "current_task": "Weekly session scheduled",
+      "task_due": "2025-03-29T16:00:00Z",
+      "trust_score": 95,
+      "last_update": "2025-03-25T16:00:00Z",
+      "last_update_text": "Session completed. Child adjustment plan discussed."
+    },
+    {
+      "id": "PROF_004",
+      "name": "Mr. Vikram Joshi",
+      "role": "property_valuator",
+      "status": "waiting",
+      "status_bar_color": "#A8A29E",
+      "current_task": "Awaiting property access confirmation",
+      "task_due": "2025-04-02T17:00:00Z",
+      "trust_score": 78,
+      "last_update": "2025-03-24T14:00:00Z",
+      "last_update_text": "Site visit scheduled for April 2nd \u2014 access confirmation needed."
+    },
+    {
+      "id": "PROF_005",
+      "name": "Ms. Kavitha Rao",
+      "role": "mediator",
+      "status": "waiting",
+      "status_bar_color": "#A8A29E",
+      "current_task": "Standing by \u2014 will engage after documentation phase",
+      "task_due": null,
+      "trust_score": 89,
+      "last_update": "2025-03-20T10:00:00Z",
+      "last_update_text": "On standby. Will schedule first session once property valuation complete."
+    }
+  ],
+  "decisions_pending": [
+    {
+      "id": "DEC_001",
+      "title": "Confirm property site visit access",
+      "context": "Mr. Joshi (Property Valuator) needs access to the Pune flat on April 2nd. Your husband must also confirm access. Do you want us to send the confirmation request on your behalf?",
+      "urgency": "normal",
+      "deadline": "2025-03-30T17:00:00Z",
+      "options": [
+        {
+          "id": "opt_a",
+          "label": "Yes \u2014 send confirmation on my behalf",
+          "consequence": "We notify both parties and Mr. Joshi. Site visit proceeds April 2nd."
+        },
+        {
+          "id": "opt_b",
+          "label": "I'll confirm directly",
+          "consequence": "We send you Mr. Joshi's contact. You handle coordination."
+        }
+      ]
+    }
+  ],
+  "risk_snapshot": {
+    "score": 34,
+    "label": "Low",
+    "statement": "Lower risk than 71 of 100 similar cases",
+    "trend": "stable"
+  },
+  "case_dna_snapshot": {
+    "total_nodes": 8,
+    "completed_nodes": 3,
+    "active_nodes": 2,
+    "blocked_nodes": 0,
+    "phases": [
+      {
+        "key": "setup",
+        "label": "Setup",
+        "status": "completed",
+        "days": 5
+      },
+      {
+        "key": "docs",
+        "label": "Documentation",
+        "status": "active",
+        "days": null
+      },
+      {
+        "key": "negotiation",
+        "label": "Negotiation",
+        "status": "pending",
+        "days": null
+      },
+      {
+        "key": "draft",
+        "label": "Draft",
+        "status": "pending",
+        "days": null
+      },
+      {
+        "key": "filing",
+        "label": "Filing",
+        "status": "pending",
+        "days": null
+      }
+    ]
+  },
+  "timeline_summary": {
+    "case_start": "2025-03-15T22:15:53Z",
+    "predicted_end": "2025-05-22T00:00:00Z",
+    "days_elapsed": 12,
+    "days_remaining": 56,
+    "on_track": true,
+    "next_milestone": "Property valuation \u2014 April 2nd"
+  }
+}

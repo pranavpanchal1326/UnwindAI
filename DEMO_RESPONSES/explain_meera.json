@@ -1,1 +1,47 @@
-{ "status": "placeholder — filled in Phase 10-C" }
+{
+  "demo_id": "meera_explain_v4",
+  "case_id": "CASE_MEERA_DEMO_001",
+  "path_explained": "collab",
+  "predicted_duration_days": 75,
+  "base_duration_days": 93,
+  "explanation_cards": [
+    {
+      "factor": "Court Backlog",
+      "impact": "slower",
+      "days_impact": 12,
+      "icon": "calendar-x",
+      "headline": "Pune court scheduling adds time",
+      "detail": "The Pune family court currently has a 9-month backlog. Even for collaborative cases, this affects filing and decree timelines.",
+      "what_you_can_do": "Filing in January (court calendar reset) can reduce this by 2\u20133 weeks."
+    },
+    {
+      "factor": "Custody Arrangement",
+      "impact": "slower",
+      "days_impact": 8,
+      "icon": "heart",
+      "headline": "Custody terms extend negotiation",
+      "detail": "Cases with children take longer in the negotiation phase \u2014 not because of conflict, but because custody terms require more careful drafting.",
+      "what_you_can_do": "Having a clear initial custody proposal ready for week 1 reduces this by up to 5 days."
+    },
+    {
+      "factor": "No Business Assets",
+      "impact": "faster",
+      "days_impact": -8,
+      "icon": "check-circle",
+      "headline": "No business valuation needed",
+      "detail": "Cases without business ownership skip the business valuation phase entirely. This removes a major source of delay and cost.",
+      "what_you_can_do": "Nothing required \u2014 this is already working in your favour."
+    },
+    {
+      "factor": "Asset Complexity",
+      "impact": "neutral",
+      "days_impact": 3,
+      "icon": "home",
+      "headline": "Single property \u2014 straightforward",
+      "detail": "A single jointly-owned apartment is one of the simpler asset configurations. Property valuation is a one-time event.",
+      "what_you_can_do": "Getting the property pre-appraised before legal proceedings start saves 3\u20135 days."
+    }
+  ],
+  "confidence_statement": "These estimates are based on 200,000 similar cases. Meera's case falls within the normal distribution \u2014 confidence intervals are standard.",
+  "model_note": "Explanations use SHAP TreeExplainer values translated to plain language. Raw feature contributions available on request."
+}

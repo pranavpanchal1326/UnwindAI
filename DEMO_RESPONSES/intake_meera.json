@@ -1,1 +1,95 @@
-{ "status": "placeholder — filled in Phase 10-B" }
+{
+  "demo_id": "meera_intake_v4",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Tell me what is happening.",
+      "timestamp": "2025-03-15T22:14:00Z",
+      "font_spec": "fraunces-italic-300-32px"
+    },
+    {
+      "role": "user",
+      "content": "My husband told me last Tuesday that he wants a divorce. We have a 7-year-old daughter. I don't know what to do.",
+      "timestamp": "2025-03-15T22:14:23Z"
+    },
+    {
+      "role": "assistant",
+      "content": "I'm sorry. That's a lot to take in, especially with your daughter involved. Can you tell me \u2014 do you own property together, or have joint financial accounts?",
+      "timestamp": "2025-03-15T22:14:24Z"
+    },
+    {
+      "role": "user",
+      "content": "Yes, we have a flat in Pune. We bought it together 6 years ago. And we have joint savings.",
+      "timestamp": "2025-03-15T22:14:51Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Understood. And is there a family business or professional practice either of you own \u2014 fully or partly?",
+      "timestamp": "2025-03-15T22:14:52Z"
+    },
+    {
+      "role": "user",
+      "content": "No, we're both salaried.",
+      "timestamp": "2025-03-15T22:15:08Z"
+    },
+    {
+      "role": "assistant",
+      "content": "That simplifies things meaningfully. How would you describe the urgency \u2014 is there a timeline pressure, or do you have time to work through this carefully?",
+      "timestamp": "2025-03-15T22:15:09Z"
+    },
+    {
+      "role": "user",
+      "content": "He wants to move out by end of month. So I feel some pressure but I want to do this right for my daughter.",
+      "timestamp": "2025-03-15T22:15:38Z"
+    },
+    {
+      "role": "assistant",
+      "content": "That's a reasonable position and it's clear you're thinking of her first. One more thing \u2014 how long have you been married?",
+      "timestamp": "2025-03-15T22:15:39Z"
+    },
+    {
+      "role": "user",
+      "content": "11 years.",
+      "timestamp": "2025-03-15T22:15:52Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Thank you for sharing all of this. I have enough to start building your case. I'm assigning your team now.",
+      "timestamp": "2025-03-15T22:15:53Z"
+    }
+  ],
+  "extracted_case_profile": {
+    "case_type": "divorce",
+    "city": "pune",
+    "total_asset_value_inr": 12800000,
+    "children_count": 1,
+    "children_ages": [
+      7
+    ],
+    "business_ownership": false,
+    "marriage_duration_years": 11,
+    "petitioner_age": 34,
+    "urgency": "medium",
+    "urgency_int": 1,
+    "complexity_score": 4.2,
+    "professional_count": 5,
+    "property_description": "Joint flat in Pune \u2014 6 years old",
+    "additional_notes": "Husband initiating. Daughter 7 years. Both salaried."
+  },
+  "ml_features": [
+    0,
+    3,
+    12800000,
+    1,
+    0,
+    11,
+    34,
+    5,
+    1,
+    9,
+    1.0,
+    4.2
+  ],
+  "case_id": "CASE_MEERA_DEMO_001",
+  "intake_completed_at": "2025-03-15T22:15:53Z"
+}

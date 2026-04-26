@@ -1,33 +1,33 @@
 {
   "path_recommender": {
-    "oob_score": 0.8593,
-    "test_accuracy": 0.85915,
+    "oob_score": 0.85778,
+    "test_accuracy": 0.85825,
     "confusion_matrix": [
       [
-        23203,
-        737,
-        7
-      ],
-      [
-        2462,
-        11091,
+        11566,
+        400,
         5
       ],
       [
-        1651,
-        772,
-        72
+        1207,
+        5564,
+        8
+      ],
+      [
+        821,
+        394,
+        35
       ]
     ],
     "onnx_verified": true
   },
   "risk_scorer": {
-    "mae": 0.6070857547076941,
-    "meera_risk_score": 41,
+    "mae": 0.6073568850832965,
+    "meera_risk_score": 40,
     "meera_risk_factors": [
-      "Urgency level impacts resolution speed",
-      "High complexity score increases risk",
-      "Children involved impacts custody risk"
+      "Medium urgency leaves room for collaborative resolution",
+      "Custody dispute increases complexity score",
+      "Children count is a key risk driver"
     ],
     "onnx_verified": true
   }

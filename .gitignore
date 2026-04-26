@@ -71,3 +71,10 @@ coverage/
 # scripts/synthetic/stage1_structural.py  ← generation script
 # scripts/ml/train_models.py        ← training script
 # contracts/*.sol                   ← smart contracts
+# Raw pkl artifacts
+models/pkl/
+*.jsonl
+
+# Phase 1 Required Ignores
+**/*.jsonl
+scripts/ml/logs/*.log

@@ -1,0 +1,7 @@
+{
+  "duration_percentile": 71,
+  "cost_percentile": 64,
+  "statement_duration": "Faster than 71 of 100 similar Pune divorce cases",
+  "statement_cost": "Lower cost than 64 of 100 similar cases",
+  "comparison_basis": "pune_divorce"
+}

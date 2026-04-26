@@ -1,0 +1,296 @@
+{
+  "total_indexes": 35,
+  "total_cases_indexed": 40000,
+  "build_time_total_seconds": 1.4236862999969162,
+  "slowest_query_ms": 0.045000000682193786,
+  "fastest_query_ms": 0.021749998268205673,
+  "median_query_ms": 0.024950000806711614,
+  "meera_query": {
+    "top_path": "collab",
+    "median_duration_days": 85,
+    "median_cost_inr": 136250,
+    "custody_insight": "Computed in Part 3"
+  },
+  "all_indexes": [
+    {
+      "index_name": "knn_mumbai_divorce",
+      "case_count": 5134,
+      "build_time_ms": 74.28280000021914,
+      "query_time_ms": 0.029599999834317714,
+      "tree_size_kb": 385.474609375,
+      "payload_size_kb": 388.9765625
+    },
+    {
+      "index_name": "knn_mumbai_inheritance",
+      "case_count": 1397,
+      "build_time_ms": 38.94869999930961,
+      "query_time_ms": 0.023649998183827847,
+      "tree_size_kb": 104.7080078125,
+      "payload_size_kb": 104.5712890625
+    },
+    {
+      "index_name": "knn_mumbai_property",
+      "case_count": 1217,
+      "build_time_ms": 38.53939999680733,
+      "query_time_ms": 0.027599999157246202,
+      "tree_size_kb": 89.0517578125,
+      "payload_size_kb": 90.6845703125
+    },
+    {
+      "index_name": "knn_mumbai_business",
+      "case_count": 691,
+      "build_time_ms": 33.90719999879366,
+      "query_time_ms": 0.023650001821806654,
+      "tree_size_kb": 52.05859375,
+      "payload_size_kb": 53.1689453125
+    },
+    {
+      "index_name": "knn_mumbai_nri",
+      "case_count": 320,
+      "build_time_ms": 30.1368000000366,
+      "query_time_ms": 0.02234999556094408,
+      "tree_size_kb": 23.72265625,
+      "payload_size_kb": 25.384765625
+    },
+    {
+      "index_name": "knn_delhi_divorce",
+      "case_count": 4658,
+      "build_time_ms": 73.11270000354853,
+      "query_time_ms": 0.04084999818587676,
+      "tree_size_kb": 339.9970703125,
+      "payload_size_kb": 352.318359375
+    },
+    {
+      "index_name": "knn_delhi_inheritance",
+      "case_count": 1331,
+      "build_time_ms": 39.69459999643732,
+      "query_time_ms": 0.028300000849412754,
+      "tree_size_kb": 100.0673828125,
+      "payload_size_kb": 100.0068359375
+    },
+    {
+      "index_name": "knn_delhi_property",
+      "case_count": 1058,
+      "build_time_ms": 35.50830000312999,
+      "query_time_ms": 0.02819999644998461,
+      "tree_size_kb": 77.8720703125,
+      "payload_size_kb": 79.0302734375
+    },
+    {
+      "index_name": "knn_delhi_business",
+      "case_count": 616,
+      "build_time_ms": 35.49600000405917,
+      "query_time_ms": 0.026699999580159783,
+      "tree_size_kb": 45.28515625,
+      "payload_size_kb": 46.9853515625
+    },
+    {
+      "index_name": "knn_delhi_nri",
+      "case_count": 342,
+      "build_time_ms": 29.848599995602854,
+      "query_time_ms": 0.022849999368190765,
+      "tree_size_kb": 26.01953125,
+      "payload_size_kb": 27.30078125
+    },
+    {
+      "index_name": "knn_bangalore_divorce",
+      "case_count": 3755,
+      "build_time_ms": 64.25859999581007,
+      "query_time_ms": 0.04345000343164429,
+      "tree_size_kb": 276.5048828125,
+      "payload_size_kb": 282.4814453125
+    },
+    {
+      "index_name": "knn_bangalore_inheritance",
+      "case_count": 1040,
+      "build_time_ms": 36.63419999793405,
+      "query_time_ms": 0.023550001060357317,
+      "tree_size_kb": 76.6064453125,
+      "payload_size_kb": 77.2529296875
+    },
+    {
+      "index_name": "knn_bangalore_property",
+      "case_count": 886,
+      "build_time_ms": 34.578599996166304,
+      "query_time_ms": 0.0226500014832709,
+      "tree_size_kb": 65.7783203125,
+      "payload_size_kb": 66.0693359375
+    },
+    {
+      "index_name": "knn_bangalore_business",
+      "case_count": 520,
+      "build_time_ms": 33.00139999919338,
+      "query_time_ms": 0.022449999960372224,
+      "tree_size_kb": 38.53515625,
+      "payload_size_kb": 39.8466796875
+    },
+    {
+      "index_name": "knn_bangalore_nri",
+      "case_count": 268,
+      "build_time_ms": 31.371999997645617,
+      "query_time_ms": 0.023299999156733975,
+      "tree_size_kb": 20.06640625,
+      "payload_size_kb": 21.1875
+    },
+    {
+      "index_name": "knn_pune_divorce",
+      "case_count": 2992,
+      "build_time_ms": 55.699600001389626,
+      "query_time_ms": 0.03804999869316816,
+      "tree_size_kb": 222.8564453125,
+      "payload_size_kb": 225.537109375
+    },
+    {
+      "index_name": "knn_pune_inheritance",
+      "case_count": 790,
+      "build_time_ms": 33.23339999769814,
+      "query_time_ms": 0.025449997338000685,
+      "tree_size_kb": 59.01953125,
+      "payload_size_kb": 58.87109375
+    },
+    {
+      "index_name": "knn_pune_property",
+      "case_count": 681,
+      "build_time_ms": 32.48819999862462,
+      "query_time_ms": 0.024700006179045886,
+      "tree_size_kb": 51.35546875,
+      "payload_size_kb": 51.2333984375
+    },
+    {
+      "index_name": "knn_pune_business",
+      "case_count": 414,
+      "build_time_ms": 32.65020000253571,
+      "query_time_ms": 0.041799998143687844,
+      "tree_size_kb": 31.08203125,
+      "payload_size_kb": 31.49609375
+    },
+    {
+      "index_name": "knn_pune_nri",
+      "case_count": 229,
+      "build_time_ms": 27.643500005069654,
+      "query_time_ms": 0.022100000933278352,
+      "tree_size_kb": 17.322265625,
+      "payload_size_kb": 18.224609375
+    },
+    {
+      "index_name": "knn_hyderabad_divorce",
+      "case_count": 2820,
+      "build_time_ms": 55.01219999860041,
+      "query_time_ms": 0.032899999496294186,
+      "tree_size_kb": 210.7626953125,
+      "payload_size_kb": 211.28125
+    },
+    {
+      "index_name": "knn_hyderabad_inheritance",
+      "case_count": 767,
+      "build_time_ms": 33.6613000035868,
+      "query_time_ms": 0.025749999622348696,
+      "tree_size_kb": 57.40234375,
+      "payload_size_kb": 57.24609375
+    },
+    {
+      "index_name": "knn_hyderabad_property",
+      "case_count": 655,
+      "build_time_ms": 34.12009999738075,
+      "query_time_ms": 0.028449998353607953,
+      "tree_size_kb": 49.52734375,
+      "payload_size_kb": 49.2255859375
+    },
+    {
+      "index_name": "knn_hyderabad_business",
+      "case_count": 408,
+      "build_time_ms": 30.413300002692267,
+      "query_time_ms": 0.021949999791104347,
+      "tree_size_kb": 30.66015625,
+      "payload_size_kb": 31.14453125
+    },
+    {
+      "index_name": "knn_hyderabad_nri",
+      "case_count": 176,
+      "build_time_ms": 28.955800000403542,
+      "query_time_ms": 0.023200002033263445,
+      "tree_size_kb": 13.595703125,
+      "payload_size_kb": 13.857421875
+    },
+    {
+      "index_name": "knn_chennai_divorce",
+      "case_count": 2058,
+      "build_time_ms": 45.24390000005951,
+      "query_time_ms": 0.026549998437985778,
+      "tree_size_kb": 151.1845703125,
+      "payload_size_kb": 155.5517578125
+    },
+    {
+      "index_name": "knn_chennai_inheritance",
+      "case_count": 590,
+      "build_time_ms": 35.68020000238903,
+      "query_time_ms": 0.024950000806711614,
+      "tree_size_kb": 43.45703125,
+      "payload_size_kb": 44.138671875
+    },
+    {
+      "index_name": "knn_chennai_property",
+      "case_count": 513,
+      "build_time_ms": 31.76510000048438,
+      "query_time_ms": 0.023250002413988113,
+      "tree_size_kb": 38.04296875,
+      "payload_size_kb": 38.2431640625
+    },
+    {
+      "index_name": "knn_chennai_business",
+      "case_count": 301,
+      "build_time_ms": 33.42720000364352,
+      "query_time_ms": 0.02255000072182156,
+      "tree_size_kb": 22.38671875,
+      "payload_size_kb": 23.0966796875
+    },
+    {
+      "index_name": "knn_chennai_nri",
+      "case_count": 138,
+      "build_time_ms": 28.6947999993572,
+      "query_time_ms": 0.037850000808248296,
+      "tree_size_kb": 10.548828125,
+      "payload_size_kb": 10.955078125
+    },
+    {
+      "index_name": "knn_ahmedabad_divorce",
+      "case_count": 1872,
+      "build_time_ms": 45.07440000452334,
+      "query_time_ms": 0.02925000080722384,
+      "tree_size_kb": 138.1064453125,
+      "payload_size_kb": 140.7470703125
+    },
+    {
+      "index_name": "knn_ahmedabad_inheritance",
+      "case_count": 528,
+      "build_time_ms": 31.880499998806044,
+      "query_time_ms": 0.045000000682193786,
+      "tree_size_kb": 39.09765625,
+      "payload_size_kb": 39.5595703125
+    },
+    {
+      "index_name": "knn_ahmedabad_property",
+      "case_count": 464,
+      "build_time_ms": 33.1607999978587,
+      "query_time_ms": 0.021749998268205673,
+      "tree_size_kb": 34.59765625,
+      "payload_size_kb": 34.3505859375
+    },
+    {
+      "index_name": "knn_ahmedabad_business",
+      "case_count": 269,
+      "build_time_ms": 28.828599999542348,
+      "query_time_ms": 0.022950000129640102,
+      "tree_size_kb": 20.13671875,
+      "payload_size_kb": 20.5419921875
+    },
+    {
+      "index_name": "knn_ahmedabad_nri",
+      "case_count": 102,
+      "build_time_ms": 27.06670000043232,
+      "query_time_ms": 0.02179999864893034,
+      "tree_size_kb": 8.017578125,
+      "payload_size_kb": 8.037109375
+    }
+  ]
+}

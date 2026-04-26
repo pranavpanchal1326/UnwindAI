@@ -1,32 +1,32 @@
 {
   "collab": {
-    "duration_mae": 28.693572743956317,
-    "cost_mae": 42887.67086195152,
-    "onnx_verified": true
+    "duration_mae": 28.49102427492238,
+    "onnx_verified": true,
+    "cost_mae": 42884.58899118729
   },
   "med": {
-    "duration_mae": 48.306825786131355,
-    "cost_mae": 100143.17514752563,
-    "onnx_verified": true
+    "duration_mae": 48.651456456179936,
+    "onnx_verified": true,
+    "cost_mae": 99843.5450847271
   },
   "court": {
-    "duration_mae": 208.04459434450456,
-    "cost_mae": 265458.1010980589,
-    "onnx_verified": true
+    "duration_mae": 209.8510225298205,
+    "onnx_verified": true,
+    "cost_mae": 268934.2867126163
   },
-  "calibration_max_deviation": 4.571938472253123e-08,
   "meera_predictions": {
     "collab": {
-      "duration": 79.16268009458354,
-      "cost": 103930.59012871688
+      "duration": 75.37188720703125,
+      "cost": 102632.234375
     },
     "med": {
-      "duration": 163.19294029578433,
-      "cost": 282344.79576119955
+      "duration": 164.28692626953125,
+      "cost": 283225.15625
     },
     "court": {
-      "duration": 482.49389994321217,
-      "cost": 700148.3359075942
+      "duration": 475.105224609375,
+      "cost": 692383.9375
     }
-  }
+  },
+  "calibration_max_deviation": 0.03265331684577655
 }

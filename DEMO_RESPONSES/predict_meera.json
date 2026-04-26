@@ -1,1 +1,221 @@
-{ "status": "placeholder — filled in Phase 10-C" }
+{
+  "demo_id": "meera_predict_v4",
+  "case_id": "CASE_MEERA_DEMO_001",
+  "generated_from": "real_onnx_models",
+  "model_version": "4.0",
+  "generated_at": "2026-04-25T22:33:16.668422Z",
+  "risk": {
+    "score": 41,
+    "label": "Medium",
+    "percentile_statement": "Lower risk than 64 of 100 similar cases",
+    "factors": [
+      "Court backlog in Pune adds 9 months of calendar risk",
+      "Custody arrangement adds time to negotiation phase",
+      "No business ownership simplifies asset division"
+    ]
+  },
+  "recommended_path": {
+    "path": "med",
+    "confidence": 0.6692643165588379,
+    "confidence_pct": 66,
+    "reason": "Your case has low complexity and no contested business assets \u2014 collaborative resolution is significantly faster and less costly."
+  },
+  "paths": {
+    "collab": {
+      "label": "Collaborative",
+      "duration_days": 75,
+      "duration_range": "60\u2013164 days",
+      "cost_inr": 102632,
+      "cost_range": "\u20b988,000\u2013\u20b9293,000",
+      "success_probability": 0.5633340193746016,
+      "success_pct": 56,
+      "recommended": false,
+      "description": "Both parties negotiate directly with professional support. No court involvement.",
+      "pros": [
+        "Fastest resolution \u2014 no court delays",
+        "Significantly lower cost",
+        "More control over custody terms",
+        "Less adversarial for your daughter"
+      ],
+      "cons": [
+        "Requires cooperation from both parties",
+        "Less enforceable without formal mediation"
+      ]
+    },
+    "med": {
+      "label": "Mediation",
+      "duration_days": 164,
+      "duration_range": "120\u2013180 days",
+      "cost_inr": 283225,
+      "cost_range": "\u20b91,80,000\u2013\u20b92,80,000",
+      "success_probability": 0.4506672154996813,
+      "success_pct": 45,
+      "recommended": true,
+      "description": "A trained mediator facilitates structured negotiation. Outcome is a binding agreement.",
+      "pros": [
+        "Structured process with professional oversight",
+        "Binding mediated agreement",
+        "Still significantly faster than court"
+      ],
+      "cons": [
+        "Higher cost than collaborative",
+        "Requires finding and scheduling mediator"
+      ]
+    },
+    "court": {
+      "label": "Litigation",
+      "duration_days": 475,
+      "duration_range": "280\u2013420 days",
+      "cost_inr": 692384,
+      "cost_range": "\u20b94,20,000\u2013\u20b96,80,000",
+      "success_probability": 0.33800041162476097,
+      "success_pct": 33,
+      "recommended": false,
+      "description": "Full court proceedings. Judge determines outcome if parties cannot agree.",
+      "pros": [
+        "Court order is fully enforceable",
+        "Appropriate when other paths have failed"
+      ],
+      "cons": [
+        "Slowest by significant margin",
+        "Most expensive \u2014 includes court fees and extended legal hours",
+        "Process is public record",
+        "Adversarial environment is harder on children"
+      ]
+    }
+  },
+  "phase_timeline": {
+    "total_days": 75,
+    "phases": [
+      {
+        "name": "Setup",
+        "key": "setup",
+        "days": 5,
+        "description": "Professional team assembled, documents requested, case profile finalized"
+      },
+      {
+        "name": "Documentation",
+        "key": "docs",
+        "days": 13,
+        "description": "Property valuation, financial records, legal document preparation"
+      },
+      {
+        "name": "Negotiation",
+        "key": "negotiation",
+        "days": 26,
+        "description": "Asset division discussions, custody agreement drafting"
+      },
+      {
+        "name": "Draft Agreement",
+        "key": "draft",
+        "days": 16,
+        "description": "Legal review of draft settlement, revision cycles"
+      },
+      {
+        "name": "Filing",
+        "key": "filing",
+        "days": 15,
+        "description": "Court filing, waiting period, decree absolute"
+      }
+    ]
+  },
+  "percentile": {
+    "duration_percentile": 71,
+    "cost_percentile": 64,
+    "statement_duration": "Faster than 71 of 100 similar Pune divorce cases",
+    "statement_cost": "Lower cost than 64 of 100 similar cases",
+    "comparison_basis": "pune_divorce",
+    "comparison_count": 14909
+  },
+  "shap_explanation": {
+    "base_duration_days": 93,
+    "predicted_duration_days": 76,
+    "top_factors_slower": [
+      "Custody arrangements add 7 days to negotiation",
+      "January filing aligns with court calendar resets",
+      "Straightforward asset structure speeds resolution"
+    ],
+    "top_factors_faster": [
+      "Case type impacts the overall timeline",
+      "Low court backlog means faster scheduling",
+      "No business to value removes a major delay factor"
+    ],
+    "feature_contributions": {
+      "case_type": -8,
+      "city": -1,
+      "total_asset_value_inr": -4,
+      "children_count": 4,
+      "business_ownership": -4,
+      "marriage_duration_years": -4,
+      "petitioner_age": 0,
+      "professional_count": 0,
+      "urgency": 0,
+      "court_backlog_months": -4,
+      "filing_season_score": 3,
+      "complexity_score": 2
+    }
+  },
+  "similar_cases_preview": {
+    "count": 20,
+    "index_queried": "knn_pune_divorce",
+    "custody_insight": "Custody terms were resolved within the standard timeline in most cases similar to yours.",
+    "top_3_outcomes": [
+      {
+        "case_id": "e2044e9f-025b-4e36-a4c1-9e19f371562b",
+        "duration_days": 55,
+        "cost_inr": 96000,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 1,
+        "distance": 0.2513302705082462
+      },
+      {
+        "case_id": "6b7e5fda-82c2-428e-bf62-f038042d4159",
+        "duration_days": 48,
+        "cost_inr": 113500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Resolved collaboratively in under 60 days",
+        "rank": 2,
+        "distance": 0.2551283300216705
+      },
+      {
+        "case_id": "60e51fbe-c07f-4b32-84c3-fc176423524e",
+        "duration_days": 82,
+        "cost_inr": 111500,
+        "path_taken": "collab",
+        "success": true,
+        "key_factor": "Collaborative resolution \u2014 no court needed",
+        "rank": 3,
+        "distance": 0.25814485502683643
+      }
+    ]
+  },
+  "anomaly_check": {
+    "is_anomalous": false,
+    "anomaly_score": -0.312,
+    "confidence_interval_modifier": 1.0,
+    "note": "Case is within normal training distribution"
+  },
+  "inference_metadata": {
+    "models_used": [
+      "outcome_collab_duration.onnx",
+      "outcome_collab_cost.onnx",
+      "outcome_med_duration.onnx",
+      "outcome_med_cost.onnx",
+      "outcome_court_duration.onnx",
+      "outcome_court_cost.onnx",
+      "path_recommender.onnx",
+      "risk_scorer.onnx",
+      "phase_setup.onnx",
+      "phase_docs.onnx",
+      "phase_negotiation.onnx",
+      "phase_draft.onnx",
+      "phase_filing.onnx"
+    ],
+    "total_inference_time_ms": 1511.895600000571,
+    "demo_mode": true,
+    "cache_hit": true
+  }
+}

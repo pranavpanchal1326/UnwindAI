@@ -1,0 +1,132 @@
+{
+  "divorce": {
+    "feature_importances": {
+      "case_type": 9.427407748191365,
+      "city": 1.965885259195994,
+      "total_asset_value_inr": 5.092229142823428,
+      "children_count": 3.8481043444313774,
+      "business_ownership": 5.964809482804642,
+      "marriage_duration_years": 4.097151908169568,
+      "petitioner_age": 0.35330422278528095,
+      "professional_count": 0.13800985836993893,
+      "urgency": 0.17344750506792223,
+      "court_backlog_months": 2.250447576428216,
+      "filing_season_score": 7.216774915056146,
+      "complexity_score": 1.8452624683764418
+    },
+    "top_3_faster": [
+      "Collaborative path removes court backlog entirely",
+      "No business ownership simplifies asset division",
+      "Low urgency allows time for negotiation"
+    ],
+    "top_3_slower": [
+      "Court backlog in your city adds 9 months of calendar risk",
+      "Child custody adds 12 days on average to negotiation phase",
+      "High complexity score reflects multiple asset types"
+    ]
+  },
+  "inheritance": {
+    "feature_importances": {
+      "case_type": 2.078180165337709,
+      "city": 2.0764168307612825,
+      "total_asset_value_inr": 6.023494728112385,
+      "children_count": 1.8677292335081483,
+      "business_ownership": 6.557534060292496,
+      "marriage_duration_years": 4.232731681124475,
+      "petitioner_age": 0.331725352050399,
+      "professional_count": 0.1307038104301598,
+      "urgency": 0.15862292765224345,
+      "court_backlog_months": 2.208485582936161,
+      "filing_season_score": 8.864851731564512,
+      "complexity_score": 1.5955872325800566
+    },
+    "top_3_faster": [
+      "Collaborative path removes court backlog entirely",
+      "No business ownership simplifies asset division",
+      "Low urgency allows time for negotiation"
+    ],
+    "top_3_slower": [
+      "Court backlog in your city adds 9 months of calendar risk",
+      "Child custody adds 12 days on average to negotiation phase",
+      "High complexity score reflects multiple asset types"
+    ]
+  },
+  "property": {
+    "feature_importances": {
+      "case_type": 10.022754531057071,
+      "city": 2.123211749392137,
+      "total_asset_value_inr": 5.227256093894292,
+      "children_count": 1.8262443743288401,
+      "business_ownership": 5.099442465449504,
+      "marriage_duration_years": 3.9399249128076748,
+      "petitioner_age": 0.28972485574094803,
+      "professional_count": 0.14566328855219296,
+      "urgency": 0.14619349766615544,
+      "court_backlog_months": 2.220590889190233,
+      "filing_season_score": 8.224971296208071,
+      "complexity_score": 1.83544264716368
+    },
+    "top_3_faster": [
+      "Collaborative path removes court backlog entirely",
+      "No business ownership simplifies asset division",
+      "Low urgency allows time for negotiation"
+    ],
+    "top_3_slower": [
+      "Court backlog in your city adds 9 months of calendar risk",
+      "Child custody adds 12 days on average to negotiation phase",
+      "High complexity score reflects multiple asset types"
+    ]
+  },
+  "business": {
+    "feature_importances": {
+      "case_type": 7.533540839584779,
+      "city": 2.616979659960585,
+      "total_asset_value_inr": 6.649961293122537,
+      "children_count": 1.8546151641739506,
+      "business_ownership": 12.321682844210773,
+      "marriage_duration_years": 4.8015840477834875,
+      "petitioner_age": 0.3887115653714258,
+      "professional_count": 0.1398331696343212,
+      "urgency": 0.21705629015543249,
+      "court_backlog_months": 2.8761956425433577,
+      "filing_season_score": 8.25816214974599,
+      "complexity_score": 1.9729695280619375
+    },
+    "top_3_faster": [
+      "Collaborative path removes court backlog entirely",
+      "No business ownership simplifies asset division",
+      "Low urgency allows time for negotiation"
+    ],
+    "top_3_slower": [
+      "Court backlog in your city adds 9 months of calendar risk",
+      "Child custody adds 12 days on average to negotiation phase",
+      "High complexity score reflects multiple asset types"
+    ]
+  },
+  "nri": {
+    "feature_importances": {
+      "case_type": 98.73131191988094,
+      "city": 3.515435463787781,
+      "total_asset_value_inr": 8.391960319257674,
+      "children_count": 1.6270817068145524,
+      "business_ownership": 12.86599985210741,
+      "marriage_duration_years": 2.55265938569392,
+      "petitioner_age": 2.007642754156756,
+      "professional_count": 1.593051098586911,
+      "urgency": 0.7903754067090244,
+      "court_backlog_months": 3.7567231452309477,
+      "filing_season_score": 15.54971739449848,
+      "complexity_score": 6.848309582114779
+    },
+    "top_3_faster": [
+      "Collaborative path removes court backlog entirely",
+      "No business ownership simplifies asset division",
+      "Low urgency allows time for negotiation"
+    ],
+    "top_3_slower": [
+      "Court backlog in your city adds 9 months of calendar risk",
+      "Child custody adds 12 days on average to negotiation phase",
+      "High complexity score reflects multiple asset types"
+    ]
+  }
+}

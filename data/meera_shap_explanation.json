@@ -1,0 +1,30 @@
+{
+  "meera_shap": {
+    "predicted_duration_collab": 76,
+    "base_duration": 93,
+    "feature_contributions": {
+      "case_type": -8,
+      "city": -1,
+      "total_asset_value_inr": -4,
+      "children_count": 4,
+      "business_ownership": -4,
+      "marriage_duration_years": -4,
+      "petitioner_age": 0,
+      "professional_count": 0,
+      "urgency": 0,
+      "court_backlog_months": -4,
+      "filing_season_score": 3,
+      "complexity_score": 2
+    },
+    "plain_language_faster": [
+      "Case type impacts the overall timeline",
+      "Low court backlog means faster scheduling",
+      "No business to value removes a major delay factor"
+    ],
+    "plain_language_slower": [
+      "Custody arrangements add 7 days to negotiation",
+      "January filing aligns with court calendar resets",
+      "Straightforward asset structure speeds resolution"
+    ]
+  }
+}

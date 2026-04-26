@@ -1,24 +1,24 @@
 {
   "anomaly_detector": {
-    "false_positive_rate": 0.049,
+    "false_positive_rate": 0.05131026205241048,
     "anomaly_detection_rate_on_edge_cases": 1.0,
     "serialization_format": "onnx",
-    "note": "IsolationForest successfully exported to ONNX using target_opset={'ai.onnx.ml': 3}."
+    "note": "IsolationForest skl2onnx support: ai.onnx.ml:3"
   },
   "phase_timeline": {
-    "setup_mae": 2.170702542970441,
-    "docs_mae": 4.866352993314902,
-    "negotiation_mae": 9.504313166316802,
-    "draft_mae": 5.945255798719619,
-    "filing_mae": 6.366443781931987,
+    "setup_mae": 2.1656623634999095,
+    "docs_mae": 4.900808592309224,
+    "negotiation_mae": 9.408784629340913,
+    "draft_mae": 5.977431270251333,
+    "filing_mae": 6.404993559783494,
     "meera_phase_days": {
       "setup": 5,
       "docs": 13,
-      "negotiation": 26,
+      "negotiation": 25,
       "draft": 16,
-      "filing": 15,
-      "total": 77
+      "filing": 14,
+      "total": 75
     },
-    "phase_sum_vs_outcome_delta": 3.4520263671875
+    "phase_sum_vs_outcome_delta": 0.08673095703125
   }
 }
