@@ -1,35 +1,28 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   UnwindAI v4.0 — Quiet Clarity Design System
-   Single source of truth for all CSS tokens.
-   Every color used anywhere MUST reference one of these variables.
-   Zero hardcoded hex values anywhere in component files.
-─────────────────────────────────────────────────────────────────────────────── */
-
+/* ── QUIET CLARITY v4.0 TOKENS ─────────────────────────── */
 :root {
-  /* BACKGROUND SYSTEM */
-  --bg-base:    #F2F1EE;   /* App background — mist warm neutral */
-  --bg-surface: #ECEAE6;   /* Cards, panels, professional status cards */
-  --bg-raised:  #E8E4DF;   /* Inputs, tooltips, elevated elements */
-  --bg-overlay: #E0DBD5;   /* Modals, dropdowns */
-  --bg-inverse: #1C1917;   /* Warm near-black — Private Mode ONLY */
+  /* Background system */
+  --bg-base:    #F2F1EE;
+  --bg-surface: #ECEAE6;
+  --bg-raised:  #E8E4DF;
+  --bg-overlay: #E0DBD5;
+  --bg-inverse: #1C1917;
 
-  /* ACCENT — MARITIME BLUE — USED IN EXACTLY 4 PLACES ONLY */
-  /* 4 places: primary button fill, active state indicator, focus ring, risk score arc */
+  /* Accent — maritime blue — 4 places only */
   --accent:      #3D5A80;
   --accent-soft: #EDE9FE;
   --accent-dim:  #2E4560;
   --accent-text: #2C4A6E;
 
-  /* TEXT HIERARCHY */
+  /* Text hierarchy */
   --text-primary:   #1C1917;
   --text-secondary: #57534E;
   --text-tertiary:  #A8A29E;
   --text-disabled:  #D6D3D1;
   --text-inverse:   #FAFAF9;
 
-  /* SEMANTIC — ALWAYS USE SOFT PAIR — NEVER BARE COLOR ON WHITE */
+  /* Semantic */
   --success:      #16A34A;
   --success-soft: #DCFCE7;
   --warning:      #D97706;
@@ -37,138 +30,86 @@
   --danger:       #DC2626;
   --danger-soft:  #FEE2E2;
 
-  /* BORDER SYSTEM */
+  /* Borders */
   --border-subtle:  #E7E5E4;
   --border-default: #D6D3D1;
   --border-strong:  #A8A29E;
-  --border-focus:   #3D5A80;  /* Always --accent at full opacity */
-
-  /* TYPOGRAPHY — FONT FAMILY REFERENCES */
-  --font-display: var(--font-fraunces), Georgia, serif;
-  --font-body:    var(--font-general-sans), system-ui, sans-serif;
-  --font-mono:    var(--font-geist-mono), 'Courier New', monospace;
-
-  /* SHADOW SYSTEM — TWO LAYERS — PAPER ON TABLE EFFECT */
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-
-  /* RADIUS */
-  --radius-card: 12px;
-  --radius-sm:   6px;
-  --radius-full: 9999px;
-
-  /* SPACING — 8px BASE GRID — MINIMUM UNIT 12px */
-  --card-padding-v: 20px;
-  --card-padding-h: 24px;
+  --border-focus:   #3D5A80;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   Tailwind v4 @theme — maps CSS vars to Tailwind utility classes
-   CSS-first architecture: all tokens defined here, not in tailwind.config.js
-─────────────────────────────────────────────────────────────────────────────── */
-
-@theme {
-  /* ── Background Colors ─────────────────────────────────────────── */
-  --color-bg-base:    var(--bg-base);
-  --color-bg-surface: var(--bg-surface);
-  --color-bg-raised:  var(--bg-raised);
-  --color-bg-overlay: var(--bg-overlay);
-  --color-bg-inverse: var(--bg-inverse);
-
-  /* ── Accent ─────────────────────────────────────────────────────── */
-  --color-accent:      var(--accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-dim:  var(--accent-dim);
-  --color-accent-text: var(--accent-text);
-
-  /* ── Text ───────────────────────────────────────────────────────── */
-  --color-text-primary:   var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-tertiary:  var(--text-tertiary);
-  --color-text-disabled:  var(--text-disabled);
-  --color-text-inverse:   var(--text-inverse);
-
-  /* ── Semantic ───────────────────────────────────────────────────── */
-  --color-success:      var(--success);
-  --color-success-soft: var(--success-soft);
-  --color-warning:      var(--warning);
-  --color-warning-soft: var(--warning-soft);
-  --color-danger:       var(--danger);
-  --color-danger-soft:  var(--danger-soft);
-
-  /* ── Borders ────────────────────────────────────────────────────── */
-  --color-border-subtle:  var(--border-subtle);
-  --color-border-default: var(--border-default);
-  --color-border-strong:  var(--border-strong);
-  --color-border-focus:   var(--border-focus);
-
-  /* ── Font Families ──────────────────────────────────────────────── */
-  --font-family-display: var(--font-display);
-  --font-family-body:    var(--font-body);
-  --font-family-mono:    var(--font-mono);
-
-  /* ── Border Radius ──────────────────────────────────────────────── */
-  --radius-card: var(--radius-card);
-  --radius-sm:   var(--radius-sm);
-  --radius-full: var(--radius-full);
-
-  /* ── Box Shadow ─────────────────────────────────────────────────── */
-  --shadow-card: var(--shadow-card);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   GRAIN TEXTURE — MANDATORY — NEVER REMOVE — NEVER MAKE CONDITIONAL
-─────────────────────────────────────────────────────────────────────────────── */
+/* ── GRAIN TEXTURE ──────────────────────────────────────── */
+/* Section 08: "SVG grain texture at 3% opacity over full
+   canvas via body::before pseudo-element" */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.03;
   pointer-events: none;
   z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   GLOBAL BODY
-─────────────────────────────────────────────────────────────────────────────── */
+/* ── SCROLLBAR — CUSTOM ─────────────────────────────────── */
+/* Section 14: "default browser aesthetics — scrollbars,
+   focus rings, selection all customized" */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* ── TEXT SELECTION ─────────────────────────────────────── */
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* ── FOCUS VISIBLE ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── GLOBAL BODY ────────────────────────────────────────── */
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   GLOBAL TEXT MAX-WIDTH RULES
-─────────────────────────────────────────────────────────────────────────────── */
-.prose-body    { max-width: 65ch; }
-.prose-intake  { max-width: 52ch; }
-.prose-legal   { max-width: 72ch; }
+/* ── TABULAR NUMS ───────────────────────────────────────── */
+/* Section 08: "tabular-nums on all table and list data" */
+table, [data-tabular] {
+  font-variant-numeric: tabular-nums;
+}
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   NUMERIC FORMATTING RULES
-─────────────────────────────────────────────────────────────────────────────── */
-.nums-tabular      { font-variant-numeric: tabular-nums; }
-.nums-proportional { font-variant-numeric: proportional-nums; }
-.nums-oldstyle     { font-variant-numeric: oldstyle-nums; }
+/* ── MAX-WIDTH PROSE ────────────────────────────────────── */
+/* Section 08: "Body text max-width 65ch globally" */
+.prose {
+  max-width: 65ch;
+}
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   SCROLLBAR
-─────────────────────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+/* ── INTAKE SPECIFIC ────────────────────────────────────── */
+.intake-container {
+  max-width: 52ch;
+  /* Section 08: "Intake screen: 52ch" */
+}
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   SELECTION
-─────────────────────────────────────────────────────────────────────────────── */
-::selection { background: var(--accent-soft); color: var(--accent-text); }
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   FOCUS RING — GLOBAL
-─────────────────────────────────────────────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
+/* ── LEGAL TEXT ─────────────────────────────────────────── */
+.legal-text {
+  max-width: 72ch;
+  /* Section 08: "Legal disclaimers: 72ch" */
 }

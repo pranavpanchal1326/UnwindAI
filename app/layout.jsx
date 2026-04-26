@@ -1,79 +1,87 @@
-'use client'
+﻿// app/layout.jsx
+// Section 05: "layout.jsx — Root layout — font loading
+//              (Fraunces + General Sans + Geist Mono)"
+// FE-11: "Font loading: Fraunces + General Sans via next/font.
+//         Geist Mono for technical strings only."
 
 import { Fraunces, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
 
-/* Fraunces — display/data/emotional moments */
+// Fraunces — emotional moments and data display
 const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-fraunces',
   display: 'swap',
-  axes: ['SOFT', 'WONK'],    /* Variable axes for weight animation */
+  weight: ['300', '400'],
+  style: ['normal', 'italic'],
+  axes: ['SOFT', 'WONK']
+  // Variable font axes for warmth control
 })
 
-/* General Sans — loaded as local font from Fontshare CDN cached locally */
-/* Download from https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap */
-/* Place in public/fonts/ and reference via localFont */
+// General Sans — from Fontshare (local font file)
+// Must be downloaded from fontshare.com and placed in public/fonts/
 const generalSans = localFont({
   src: [
-    { path: '../public/fonts/GeneralSans-Regular.woff2',  weight: '400', style: 'normal' },
-    { path: '../public/fonts/GeneralSans-Medium.woff2',   weight: '500', style: 'normal' },
-    { path: '../public/fonts/GeneralSans-Semibold.woff2', weight: '600', style: 'normal' },
+    {
+      path: '../public/fonts/GeneralSans-Regular.woff2',
+      weight: '400',
+      style: 'normal'
+    },
+    {
+      path: '../public/fonts/GeneralSans-Medium.woff2',
+      weight: '500',
+      style: 'normal'
+    },
+    {
+      path: '../public/fonts/GeneralSans-Semibold.woff2',
+      weight: '600',
+      style: 'normal'
+    }
   ],
   variable: '--font-general-sans',
-  display: 'swap',
+  display: 'swap'
 })
 
-/* Geist Mono — technical strings ONLY */
+// Geist Mono — technical strings only
 const geistMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-geist-mono',
   display: 'swap',
+  weight: ['400']
 })
 
-// ── Metadata ──────────────────────────────────────────────────────────────────
-
 export const metadata = {
-  title: 'UnwindAI — The Operating System for Life\'s Hardest Transitions',
+  title: 'UnwindAI — Navigate life\'s hardest transitions',
   description:
-    'AI agents coordinate your entire professional team. ' +
-    'You only make decisions, never chase people.',
-  keywords: ['divorce', 'legal', 'AI', 'case management', 'India'],
-  robots: { index: false, follow: false },  // private product — no indexing
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,          // prevent zoom on mobile inputs
-    userScalable: false,
-  },
-  themeColor: '#F2F1EE',      // matches --bg-base for mobile browser chrome
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'UnwindAI',
-  },
+    'AI-powered case coordination for divorce, inheritance, ' +
+    'and property matters.',
+  robots: { index: false, follow: false }
+  // No indexing — private application
 }
-
-// ── Root Layout ───────────────────────────────────────────────────────────────
 
 export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${generalSans.variable} ${geistMono.variable}`}
-      suppressHydrationWarning
+      className={`
+        ${fraunces.variable}
+        ${generalSans.variable}
+        ${geistMono.variable}
+      `}
     >
-      <body>
+      <body
+        style={{
+          backgroundColor: 'var(--bg-base)',
+          color: 'var(--text-primary)',
+          fontFamily: 'var(--font-general-sans), system-ui, sans-serif',
+          margin: 0,
+          padding: 0
+        }}
+      >
         {children}
+        {/* body::before grain texture via CSS — see globals.css */}
       </body>
     </html>
   )
 }
-
-// ── Rules for all child layouts ───────────────────────────────────────────────
-// 1. Never add a language selector — English only
-// 2. Never add Google Analytics or any tracking script
-// 3. Never add a chat widget or intercom — we ARE the support
-// 4. Providers (Supabase, wagmi) added in specific route layouts only
-//    not here — keeps root layout minimal and fast

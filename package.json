@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "unwindai",
   "version": "2.0.0",
   "private": true,
@@ -36,7 +36,7 @@
     "framer-motion": "11.15.0",
     "recharts": "2.15.0",
     "@xyflow/react": "12.3.6",
-    "@anthropic-ai/sdk": "0.36.1",
+    "@anthropic-ai/sdk": "0.36.2",
     "ai": "4.1.0",
     "@langchain/langgraph": "0.2.36",
     "@langchain/core": "0.3.28",
