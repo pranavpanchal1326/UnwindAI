@@ -1,82 +1,147 @@
+﻿// app/components/ui/ErrorCard.jsx
 'use client'
+// FE-05: Three error templates
+// Section 14: "never 'Error 500', never 'Something went wrong'"
 
-import Button from './Button'
+import { motion } from 'framer-motion'
+import { MESSAGE_VARIANTS } from '@/lib/constants/animations'
 
 /**
- * @param {'soft'|'hard'|'critical'} [props.type='hard']
- * @param {string} [props.title]
- * @param {string} [props.message]
- * @param {Function} [props.onRetry]
- * @param {boolean} [props.isRetrying=false]
- * @param {string} [props.className]
+ * ErrorCard — Three severity tiers
+ *
+ * soft:     Auto-retry happening — no user action needed
+ * hard:     User retry needed — connection issue
+ * critical: Data is safe — refresh needed
+ *
+ * NEVER: "Error 500", "Something went wrong",
+ *         raw error messages, technical language
  */
-export default function ErrorCard({ type = 'hard', title, message, onRetry, isRetrying = false, className = '' }) {
-  const configs = {
+export function ErrorCard({
+  severity = 'soft',
+  message,
+  onRetry,
+  onRefresh
+}) {
+  const COPY = {
     soft: {
-      defaultTitle:   'Give us a moment.',
-      defaultMessage: 'We are still working on this. No action needed — we will update you shortly.',
-      icon:           '○',
-      showRetry:      false,
-      bg:             'bg-bg-surface',
-      border:         'border-l-4 border-l-border-default',
+      headline: 'Taking a moment...',
+      body: message ||
+        'We\'re reconnecting. Your progress is saved.',
+      action: null
+      // No action — auto-retry in progress
     },
     hard: {
-      defaultTitle:   'Something did not load.',
-      defaultMessage: 'Your data is safe. Try again — it usually works the second time.',
-      icon:           '◎',
-      showRetry:      true,
-      bg:             'bg-warning-soft',
-      border:         'border-l-4 border-l-warning',
+      headline: 'Connection hiccup',
+      body: message ||
+        'We lost the connection briefly. Your case data is safe.',
+      action: {
+        label: 'Try again',
+        handler: onRetry
+      }
     },
     critical: {
-      defaultTitle:   'We hit an unexpected issue.',
-      defaultMessage: 'Your data is completely safe. Our team has been notified. No action needed on your end.',
-      icon:           '⊗',
-      showRetry:      false,
-      bg:             'bg-danger-soft',
-      border:         'border-l-4 border-l-danger',
-    },
+      headline: 'Something needs attention',
+      body: message ||
+        'Your information is completely safe. ' +
+        'A quick refresh will get things back on track.',
+      action: {
+        label: 'Refresh page',
+        handler: onRefresh || (() => window.location.reload())
+      }
+    }
   }
 
-  const config = configs[type]
+  const config = COPY[severity]
+
+  const borderColor = {
+    soft:     'var(--border-subtle)',
+    hard:     'var(--warning-soft)',
+    critical: 'var(--danger-soft)'
+  }[severity]
 
   return (
-    <div
+    <motion.div
+      variants={MESSAGE_VARIANTS}
+      initial="hidden"
+      animate="visible"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        borderRadius: '12px',
+        padding: '20px 24px',
+        border: `1px solid ${borderColor}`,
+        boxShadow:
+          '0 1px 3px rgba(0,0,0,0.06)'
+      }}
       role="alert"
-      aria-live="assertive"
-      className={`
-        ${config.bg} ${config.border}
-        rounded-card p-5
-        flex flex-col gap-3
-        ${className}
-      `}
+      aria-live={severity === 'critical' ? 'assertive' : 'polite'}
     >
-      <div className="flex items-start gap-3">
-        <span className="font-mono text-[16px] text-text-tertiary shrink-0 mt-0.5" aria-hidden="true">
-          {config.icon}
-        </span>
-        <div className="flex flex-col gap-1.5">
-          <p className="font-body text-[15px] font-medium text-text-primary leading-[1.3]">
-            {title || config.defaultTitle}
-          </p>
-          <p className="font-body text-[13px] text-text-secondary leading-relaxed max-w-[52ch]">
-            {message || config.defaultMessage}
-          </p>
-        </div>
-      </div>
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '14px',
+          fontWeight: 500,
+          color: 'var(--text-primary)',
+          margin: '0 0 6px'
+        }}
+      >
+        {config.headline}
+      </p>
 
-      {config.showRetry && onRetry && (
-        <div className="pl-7">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onRetry}
-            loading={isRetrying}
-          >
-            {isRetrying ? 'Trying again...' : 'Try again'}
-          </Button>
-        </div>
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '13px',
+          fontWeight: 400,
+          color: 'var(--text-secondary)',
+          lineHeight: 1.5,
+          margin: config.action ? '0 0 14px' : 0
+        }}
+      >
+        {config.body}
+      </p>
+
+      {config.action && (
+        <button
+          onClick={config.action.handler}
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: 'var(--accent)',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            letterSpacing: '+0.02em',
+            textTransform: 'uppercase',
+            textDecoration: 'underline',
+            textDecorationColor: 'var(--accent-soft)'
+          }}
+          aria-label={config.action.label}
+        >
+          {config.action.label}
+        </button>
       )}
-    </div>
+
+      {/* Soft error: subtle pulsing dot to show activity */}
+      {severity === 'soft' && (
+        <motion.div
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.2,
+            ease: 'easeInOut'
+          }}
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--text-tertiary)',
+            marginTop: '12px'
+          }}
+          aria-hidden="true"
+        />
+      )}
+    </motion.div>
   )
 }

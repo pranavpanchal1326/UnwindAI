@@ -1,64 +1,67 @@
+﻿// app/components/ui/PrivateMode.jsx
 'use client'
+// From document Section 08:
+// "Private Mode activates in under 100ms — it is a safety
+//  feature, not a UI feature"
+// "Private Mode: 100ms ease-out. Must feel instant."
+// "--bg-inverse screen. Tap restores in <100ms."
 
-import { useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { TRANSITIONS } from '../../lib/constants/animations'
+import { motion } from 'framer-motion'
+import { TRANSITIONS } from '@/lib/constants/animations'
 
-/**
- * @param {boolean} props.isActive
- * @param {Function} props.onDeactivate
- */
-export default function PrivateMode({ isActive, onDeactivate }) {
-  /* Keyboard: any key deactivates */
-  const handleKey = useCallback((e) => {
-    if (isActive) { e.preventDefault(); onDeactivate() }
-  }, [isActive, onDeactivate])
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [handleKey])
-
+export function PrivateModeOverlay({ onClose }) {
   return (
-    <AnimatePresence>
-      {isActive && (
-        <motion.div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Private mode active. Tap to restore."
-          className="fixed inset-0 z-[10000] flex items-center justify-center cursor-pointer"
-          style={{ backgroundColor: 'var(--bg-inverse)' }}   /* #1C1917 warm near-black */
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={TRANSITIONS.privateMode}               /* 100ms — must feel instant */
-          onClick={onDeactivate}
-        >
-          {/* Grain texture visible in Private Mode — using same body::before approach */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-              opacity: 0.04,
-            }}
-            aria-hidden="true"
-          />
+    <motion.div
+      key="private-mode"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={TRANSITIONS.privateMode}
+      // 100ms ease-out — must feel instant
+      onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+          onClose()
+        }
+      }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'var(--bg-inverse)',
+        // From design system: --bg-inverse: #1C1917 warm near-black
+        zIndex: 9998,
+        // Below grain texture (9999) but above everything else
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer'
+      }}
+      role="dialog"
+      aria-label="Private mode active. Tap to restore."
+      aria-modal="true"
+      tabIndex={0}
+    >
+      {/* Grain texture is visible here — body::before is z-9999 */}
+      {/* The grain on the dark background makes it feel premium */}
 
-          <div className="flex flex-col items-center gap-3 pointer-events-none">
-            {/* Lock icon */}
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-text-inverse/30">
-              <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            <p className="font-body text-[11px] font-medium uppercase tracking-[0.08em] text-text-inverse/30">
-              Private Mode
-            </p>
-            <p className="font-body text-[12px] text-text-inverse/20">
-              Tap anywhere to restore
-            </p>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      <motion.p
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...TRANSITIONS.standard, delay: 0.05 }}
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '13px',
+          fontWeight: 400,
+          color: 'var(--text-inverse)',
+          opacity: 0.4,
+          letterSpacing: '+0.08em',
+          textTransform: 'uppercase',
+          userSelect: 'none'
+        }}
+        aria-hidden="true"
+      >
+        Tap anywhere to restore
+      </motion.p>
+    </motion.div>
   )
 }

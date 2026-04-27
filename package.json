@@ -1,7 +1,7 @@
 {
   "name": "unwindai",
   "version": "2.0.0",
-  "private": true, 
+  "private": true,
   
   "scripts": {
     "dev": "next dev",
@@ -58,7 +58,8 @@
     "otplib": "12.0.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "recharts": "2.15.0",
+    "reactflow": "^11.11.4",
+    "recharts": "^2.15.0",
     "resend": "4.0.1",
     "tailwind-merge": "2.6.0",
     "tailwindcss": "4.0.0",

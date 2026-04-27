@@ -113,3 +113,10 @@ table, [data-tabular] {
   max-width: 72ch;
   /* Section 08: "Legal disclaimers: 72ch" */
 }
+
+/* ── RESPONSIVE GRIDS ───────────────────────────────────── */
+@media (min-width: 768px) {
+  .md\\:grid-cols-dashboard {
+    grid-template-columns: 1fr 320px !important;
+  }
+}
