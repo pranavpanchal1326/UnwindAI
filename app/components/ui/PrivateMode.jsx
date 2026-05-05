@@ -1,4 +1,4 @@
-﻿// app/components/ui/PrivateMode.jsx
+// app/components/ui/PrivateMode.jsx
 'use client'
 // From document Section 08:
 // "Private Mode activates in under 100ms — it is a safety

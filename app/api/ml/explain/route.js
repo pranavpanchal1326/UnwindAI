@@ -1,4 +1,4 @@
-﻿// app/api/ml/explain/route.js
+// app/api/ml/explain/route.js
 
 import { NextResponse } from 'next/server'
 import { checkDemoMode, demoResponse } from '@/lib/demo/demoMode'
@@ -31,18 +31,19 @@ export async function POST(request) {
 
     if (!profile?.shap_explanation_json) {
       // Try to load from precomputed SHAP file
-      const caseData = await supabase
+      const { data: caseData } = await supabase
         .from('cases')
         .select('case_type')
         .eq('id', case_id)
         .single()
 
+      // Dynamically import data to avoid issues
       const shapByType = await import(
-        '@/data/shap_by_case_type.json',
-        { assert: { type: 'json' } }
+        '../../../data/shap_by_case_type.json',
+        { with: { type: 'json' } }
       )
       const typeExplanation =
-        shapByType.default[caseData.data?.case_type]
+        shapByType.default[caseData?.case_type]
 
       return NextResponse.json({
         explanation_cards: buildExplanationCards(typeExplanation),

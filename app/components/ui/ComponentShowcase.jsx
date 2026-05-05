@@ -10,7 +10,7 @@ import {
   Button, Card, Badge, Input, Toggle,
   Skeleton, Modal, PrivateMode, EmptyState,
   RiskBadge, TrustBadge, ErrorCard, EMPTY_STATES,
-} from "@/components/ui"
+} from "@components/ui"
 
 export default function ComponentShowcase() {
   const [modalOpen, setModalOpen] = useState(false)

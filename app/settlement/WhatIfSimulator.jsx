@@ -1,245 +1,269 @@
-﻿// app/settlement/WhatIfSimulator.jsx
+// app/settlement/WhatIfSimulator.jsx
 'use client'
+// Block E6: prediction updates in <10ms on slider change
+// Block E7: works offline — browser ONNX, no server call
+// ONNX inference via lib/ml/whatif.js (onnxruntime-web)
 
 import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef
+  useState, useEffect, useCallback,
+  useRef, useMemo
 } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TRANSITIONS, DURATION } from '@/lib/constants/animations'
+import {
+  runAllPathsInference,
+  buildWhatIfFeatures,
+  preloadWhatIfModels
+} from '@/lib/ml/whatif'
+import { isDemoMode } from '@/lib/demo/demoMode'
 
 /**
  * WhatIfSimulator
+ * Interactive slider-based prediction explorer
  *
- * Interactive sliders that run ONNX in browser
- * ZERO server calls — fully offline (E7)
- * Updates in < 10ms (E6)
+ * Design rules from document:
+ * "Slider changes trigger inference in <10ms"
+ * "Runs onnxruntime-web in browser — never a server API call"
+ * "She can explore trade-offs without asking anyone."
  *
- * Sliders:
- * 1. Property value (total_asset_value_inr)
- * 2. Number of children
+ * Sliders control 4 key variables:
+ * 1. Total asset value (INR)
+ * 2. Complexity score
  * 3. Urgency level
- * 4. Complexity score
- * 5. Marriage duration
+ * 4. Children count
  *
- * Shows: duration diff, cost diff, risk diff vs base
+ * Prediction diff shown after every change
  */
-export function WhatIfSimulator({ baseState, caseId, isDemoMode = false }) {
-  const [isReady, setIsReady] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentValues, setCurrentValues] = useState(null)
-  const [prediction, setPrediction] = useState(null)
-  const [basePrediction, setBasePrediction] = useState(null)
-  const [inferenceMs, setInferenceMs] = useState(null)
-  const [loadError, setLoadError] = useState(false)
+export function WhatIfSimulator({
+  baseFeatures,
+  basePrediction,
+  caseType,
+  city
+}) {
+  // ─── STATE ──────────────────────────────────────────────
+  const [sliderValues, setSliderValues] = useState({
+    total_asset_value_inr:   baseFeatures?.[2] || 12800000,
+    complexity_score:        baseFeatures?.[11] || 4.2,
+    urgency:                 baseFeatures?.[8] || 1,
+    children_count:          baseFeatures?.[3] || 1
+  })
 
-  const inferenceRef = useRef(null)
-  // Ref to debounce slider — prevents queuing multiple inferences
+  const [currentPrediction, setCurrentPrediction] = useState(
+    extractBasePrediction(basePrediction)
+  )
 
-  // DEMO_MODE logic (Block J2)
-  const getDemoScale = (values) => {
-    // Deterministic simulation for demo
-    let scale = 1.0
-    if (values.urgency === 3) scale *= 0.8
-    if (values.complexity_score > 7) scale *= 1.3
-    return scale
-  }
+  const [basePred] = useState(
+    extractBasePrediction(basePrediction)
+  )
+  // Base locked once — never changes — used for diff
 
-  // Initialize base state from prop
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [isInferring, setIsInferring] = useState(false)
+  const [loadError, setLoadError] = useState(null)
+  const [lastInferenceMs, setLastInferenceMs] = useState(null)
+
+  // Debounce ref — prevents rapid-fire inference
+  const debounceRef = useRef(null)
+
+  // ─── PRELOAD MODELS ───────────────────────────────────────
   useEffect(() => {
-    if (baseState?.features) {
-      setCurrentValues({ ...baseState.features })
-      setBasePrediction(baseState.base_predictions)
-      setPrediction(baseState.base_predictions)
-    }
-  }, [baseState])
-
-  // Pre-load ONNX models on mount
-  useEffect(() => {
-    async function init() {
-      if (isDemoMode) {
-        setIsReady(true)
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        const { preloadWhatIfModels } = await import(
-          '@/lib/ml/whatif'
-        )
-        const loaded = await preloadWhatIfModels()
-        setIsReady(loaded)
-      } catch (err) {
-        console.error('[WhatIf] Init failed:', err)
-        setLoadError(true)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    init()
-  }, [isDemoMode])
-
-  // Build full 12-feature vector from current values
-  const buildFeatureVector = useCallback((values) => {
-    if (!baseState?.features) return null
-    const base = baseState.features
-
-    // Map slider values back to ML feature vector
-    // Feature order is FIXED — never reorder
-    return [
-      0,                                      // [0] case_type (fixed)
-      3,                                      // [1] city (fixed — Pune demo)
-      values.total_asset_value_inr || base.total_asset_value_inr,  // [2]
-      values.children_count ?? base.children_count,                // [3]
-      0,                                      // [4] business_ownership (fixed)
-      values.marriage_duration_years || base.marriage_duration_years, // [5]
-      34,                                     // [6] petitioner_age (fixed)
-      values.professional_count || base.professional_count, // [7]
-      values.urgency ?? base.urgency,         // [8]
-      9,                                      // [9] court_backlog (fixed)
-      1.0,                                    // [10] filing_season (fixed)
-      values.complexity_score || base.complexity_score  // [11]
-    ]
-  }, [baseState])
-
-  // Run inference when slider changes
-  const runInference = useCallback(async (values) => {
-    if (!isReady) return
-
-    // Cancel pending inference
-    if (inferenceRef.current) {
-      clearTimeout(inferenceRef.current)
+    if (isDemoMode()) {
+      // DEMO_MODE: models not needed — use basePrediction
+      setIsLoaded(true)
+      return
     }
 
-    // [E6] Slider debounce: 16ms (one frame)
-    inferenceRef.current = setTimeout(async () => {
-      if (isDemoMode) {
-        const scale = getDemoScale(values)
-        setPrediction({
-          collab_duration: Math.round(basePrediction.collab_duration * scale),
-          collab_cost:     Math.round(basePrediction.collab_cost * scale),
-          risk_score:      Math.round(basePrediction.risk_score * scale),
-          inference_ms:    2 // Faster for demo
-        })
-        return
-      }
+    if (!baseFeatures || baseFeatures.length !== 12) {
+      setLoadError('Feature data not available')
+      return
+    }
 
-      const features = buildFeatureVector(values)
-      if (!features) return
+    preloadWhatIfModels()
+      .then(({ preloaded }) => {
+        setIsLoaded(preloaded)
+        if (!preloaded) {
+          setLoadError('Models loading...')
+        }
+      })
+      .catch(err => {
+        setLoadError(err.message)
+      })
+  }, [baseFeatures])
 
-      try {
-        const { predictWhatIf } = await import('@/lib/ml/whatif')
-        const result = await predictWhatIf(features)
-        setPrediction(result)
-        setInferenceMs(result.inference_ms)
-      } catch (err) {
-        console.error('[WhatIf] Inference error:', err)
-      }
-    }, 16)
-  }, [isReady, buildFeatureVector, isDemoMode, basePrediction])
+  // ─── INFERENCE ON SLIDER CHANGE ───────────────────────────
+  const runInference = useCallback(async (overrides) => {
+    if (!isLoaded) return
+    if (!baseFeatures || baseFeatures.length !== 12) return
 
+    // DEMO_MODE: simulate instant response from base prediction
+    if (isDemoMode()) {
+      const scale = getDemoScale(overrides, sliderValues)
+      setCurrentPrediction(prev => prev
+        ? {
+            collab: {
+              duration_days: Math.round(
+                (basePred?.collab?.duration_days || 68) * scale
+              ),
+              cost_inr: Math.round(
+                (basePred?.collab?.cost_inr || 265000) * scale
+              )
+            },
+            med: {
+              duration_days: Math.round(
+                (basePred?.med?.duration_days || 94) * scale
+              ),
+              cost_inr: Math.round(
+                (basePred?.med?.cost_inr || 380000) * scale
+              )
+            },
+            court: {
+              duration_days: Math.round(
+                (basePred?.court?.duration_days || 287) * scale
+              ),
+              cost_inr: Math.round(
+                (basePred?.court?.cost_inr || 820000) * scale
+              )
+            }
+          }
+        : null
+      )
+      setLastInferenceMs(0.8)
+      // Simulated <1ms for demo
+      return
+    }
+
+    try {
+      setIsInferring(true)
+
+      const modifiedFeatures = buildWhatIfFeatures(
+        baseFeatures,
+        overrides
+      )
+
+      const start = performance.now()
+      const results = await runAllPathsInference(modifiedFeatures)
+      const elapsed = performance.now() - start
+
+      setCurrentPrediction({
+        collab: {
+          duration_days: results.collab.duration_days,
+          cost_inr:      results.collab.cost_inr,
+          risk_score:    results.collab.risk_score
+        },
+        med: {
+          duration_days: results.med.duration_days,
+          cost_inr:      results.med.cost_inr
+        },
+        court: {
+          duration_days: results.court.duration_days,
+          cost_inr:      results.court.cost_inr
+        }
+      })
+
+      setLastInferenceMs(Math.round(elapsed * 10) / 10)
+
+    } catch (err) {
+      console.error('[WhatIf] Inference failed:', err.message)
+    } finally {
+      setIsInferring(false)
+    }
+  }, [isLoaded, baseFeatures, basePred, sliderValues])
+
+  // ─── SLIDER CHANGE HANDLER ────────────────────────────────
   const handleSliderChange = useCallback((key, value) => {
-    const newValues = { ...currentValues, [key]: value }
-    setCurrentValues(newValues)
-    runInference(newValues)
-  }, [currentValues, runInference])
+    const numValue = Number(value)
 
-  // Compute diffs vs base prediction
-  const diffs = prediction && basePrediction ? {
-    duration: prediction.collab_duration - basePrediction.collab_duration,
-    cost:     prediction.collab_cost - basePrediction.collab_cost,
-    risk:     prediction.risk_score - basePrediction.risk_score
-  } : null
+    setSliderValues(prev => ({ ...prev, [key]: numValue }))
 
+    // Debounce inference — 16ms (one frame)
+    // Prevents inference on every pixel of drag
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    debounceRef.current = setTimeout(() => {
+      runInference({ ...sliderValues, [key]: numValue })
+    }, 16)
+  }, [sliderValues, runInference])
+
+  // ─── DIFF CALCULATION ─────────────────────────────────────
+  const diffs = useMemo(() => {
+    if (!currentPrediction || !basePred) return null
+
+    const collabBase = basePred?.collab?.duration_days || 68
+
+    return {
+      duration_days: (
+        (currentPrediction.collab?.duration_days || 0) -
+        collabBase
+      ),
+      cost_inr: (
+        (currentPrediction.collab?.cost_inr || 0) -
+        (basePred?.collab?.cost_inr || 265000)
+      )
+    }
+  }, [currentPrediction, basePred])
+
+  // ─── SLIDER CONFIGS ───────────────────────────────────────
   const SLIDERS = [
     {
       key:      'total_asset_value_inr',
-      label:    'Asset value',
+      label:    'Total asset value',
       min:      500000,
       max:      50000000,
-      step:     100000,
-      format:   v => `₹${Math.round(v / 100000) * 100000 >= 10000000
-        ? (v / 10000000).toFixed(1) + ' Cr'
-        : (v / 100000).toFixed(0) + ' L'}`
-    },
-    {
-      key:      'children_count',
-      label:    'Children',
-      min:      0,
-      max:      3,
-      step:     1,
-      format:   v => v === 0 ? 'None' : v === 1 ? '1 child' : `${v} children`
-    },
-    {
-      key:      'urgency',
-      label:    'Urgency',
-      min:      0,
-      max:      3,
-      step:     1,
-      format:   v => ['Low', 'Medium', 'High', 'Critical'][v] || 'Medium'
+      step:     500000,
+      format:   v => `₹${formatINR(v)}`,
+      description: 'Joint property, savings, and investments'
     },
     {
       key:      'complexity_score',
-      label:    'Complexity',
-      min:      1,
-      max:      10,
-      step:     0.5,
-      format:   v => v <= 3.3 ? 'Low' : v <= 6.6 ? 'Medium' : 'High'
+      label:    'Case complexity',
+      min:      1.0,
+      max:      10.0,
+      step:     0.1,
+      format:   v => `${v.toFixed(1)} / 10`,
+      description: 'Number of contested items and asset types'
     },
     {
-      key:      'marriage_duration_years',
-      label:    'Marriage duration',
-      min:      1,
-      max:      30,
+      key:      'urgency',
+      label:    'Urgency level',
+      min:      0,
+      max:      3,
       step:     1,
-      format:   v => `${v} years`
+      format:   v => ['Low', 'Medium', 'High', 'Critical'][v] || 'Medium',
+      description: 'How quickly resolution is needed'
+    },
+    {
+      key:      'children_count',
+      label:    'Children involved',
+      min:      0,
+      max:      3,
+      step:     1,
+      format:   v => v === 0 ? 'None' : v === 1 ? '1 child' : `${v} children`,
+      description: 'Number of children in custody consideration'
     }
   ]
 
-  if (isLoading) {
-    return (
-      <WhatIfSkeleton />
-    )
-  }
-
-  if (loadError || !isReady) {
-    return (
-      <div
-        style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderRadius: '12px',
-          padding: '24px'
-        }}
-      >
-        <p
-          style={{
-            fontFamily: 'var(--font-general-sans)',
-            fontSize: '14px',
-            color: 'var(--text-secondary)',
-            margin: 0
-          }}
-        >
-          Scenario explorer is not available in this browser.
-          Your estimates above remain accurate.
-        </p>
-      </div>
-    )
-  }
-
+  // ─── RENDER ───────────────────────────────────────────────
   return (
     <div
       style={{
         backgroundColor: 'var(--bg-surface)',
         borderRadius: '12px',
-        padding: '24px',
+        padding: '28px',
         boxShadow:
           '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)'
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          marginBottom: '28px',
+          gap: '16px'
+        }}
+      >
         <div>
           <p
             style={{
@@ -252,7 +276,7 @@ export function WhatIfSimulator({ baseState, caseId, isDemoMode = false }) {
               margin: '0 0 6px'
             }}
           >
-            Scenario Explorer
+            What-If Explorer
           </p>
           <p
             style={{
@@ -260,67 +284,105 @@ export function WhatIfSimulator({ baseState, caseId, isDemoMode = false }) {
               fontSize: '14px',
               fontWeight: 400,
               color: 'var(--text-secondary)',
-              margin: 0
+              margin: 0,
+              lineHeight: 1.4
             }}
           >
-            Adjust any factor to see how it changes your estimate.
-            Updates instantly — no internet needed.
+            Adjust the sliders to explore how changes
+            affect your timeline.
+            {lastInferenceMs !== null && (
+              <span
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                {' '}Runs in {lastInferenceMs}ms in your browser.
+              </span>
+            )}
           </p>
         </div>
-        
-        {/* [E7] Offline status indicator */}
-        <div 
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '6px',
-            padding: '4px 8px',
-            borderRadius: '100px',
-            backgroundColor: 'var(--bg-raised)',
-            border: '1px solid var(--border-subtle)'
-          }}
-        >
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--success)' }} />
-          <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-            Offline
+
+        {/* Offline indicator */}
+        {isLoaded && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexShrink: 0
+            }}
+            title="Runs in your browser — no internet needed"
+          >
+            <div
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--success)'
+              }}
+              aria-hidden="true"
+            />
+            <span
+              style={{
+                fontFamily: 'var(--font-general-sans)',
+                fontSize: '11px',
+                fontWeight: 400,
+                color: 'var(--text-tertiary)',
+                letterSpacing: '+0.04em'
+              }}
+            >
+              Offline
+            </span>
+          </div>
+        )}
+
+        {/* Load error */}
+        {loadError && (
+          <span
+            style={{
+              fontFamily: 'var(--font-general-sans)',
+              fontSize: '11px',
+              color: 'var(--text-tertiary)'
+            }}
+          >
+            {loadError}
           </span>
-        </div>
+        )}
       </div>
 
+      {/* Two column: sliders + prediction output */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: '32px'
+          gap: '40px',
+          alignItems: 'start'
         }}
-        className="whatif-grid"
       >
-        {/* Left: sliders */}
+        {/* Sliders */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px'
+            gap: '24px'
           }}
         >
           {SLIDERS.map(slider => (
             <WhatIfSlider
               key={slider.key}
               config={slider}
-              value={currentValues?.[slider.key] ??
-                baseState?.features?.[slider.key]}
+              value={sliderValues[slider.key]}
               onChange={(v) => handleSliderChange(slider.key, v)}
+              disabled={!isLoaded}
             />
           ))}
         </div>
 
-        {/* Right: prediction output */}
+        {/* Prediction output */}
         <div>
           <WhatIfOutput
-            prediction={prediction}
-            basePrediction={basePrediction}
+            currentPrediction={currentPrediction}
+            basePrediction={basePred}
             diffs={diffs}
-            inferenceMs={inferenceMs}
+            isInferring={isInferring}
           />
         </div>
       </div>
@@ -328,11 +390,19 @@ export function WhatIfSimulator({ baseState, caseId, isDemoMode = false }) {
   )
 }
 
-function WhatIfSlider({ config, value, onChange }) {
-  const displayValue = config.format(value ?? config.min)
+// ─── SLIDER COMPONENT ─────────────────────────────────────
+
+function WhatIfSlider({ config, value, onChange, disabled }) {
+  const {
+    key, label, min, max, step,
+    format, description
+  } = config
+
+  const percentage = ((value - min) / (max - min)) * 100
 
   return (
     <div>
+      {/* Label + current value */}
       <div
         style={{
           display: 'flex',
@@ -342,105 +412,164 @@ function WhatIfSlider({ config, value, onChange }) {
         }}
       >
         <label
+          htmlFor={`slider-${key}`}
           style={{
             fontFamily: 'var(--font-general-sans)',
-            fontSize: '12px',
+            fontSize: '13px',
             fontWeight: 500,
-            color: 'var(--text-secondary)',
-            letterSpacing: '+0.02em'
+            color: 'var(--text-primary)'
           }}
-          htmlFor={`slider-${config.key}`}
         >
-          {config.label}
+          {label}
         </label>
 
-        <span
+        {/* Current value display */}
+        <motion.span
+          key={String(value)}
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: DURATION.fast }}
           style={{
             fontFamily: 'var(--font-fraunces)',
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: 300,
-            color: 'var(--text-primary)',
+            color: 'var(--accent)',
+            letterSpacing: '-0.01em',
             fontVariantNumeric: 'tabular-nums'
           }}
         >
-          {displayValue}
-        </span>
+          {format(value)}
+        </motion.span>
       </div>
 
-      <input
-        id={`slider-${config.key}`}
-        type="range"
-        min={config.min}
-        max={config.max}
-        step={config.step}
-        value={value ?? config.min}
-        onChange={e => onChange(parseFloat(e.target.value))}
+      {/* Custom slider track */}
+      <div style={{ position: 'relative', height: '20px' }}>
+        {/* Track background */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '100%',
+            height: '2px',
+            backgroundColor: 'var(--border-default)',
+            borderRadius: '1px'
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Track fill */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: `${percentage}%`,
+            height: '2px',
+            backgroundColor: disabled
+              ? 'var(--border-strong)'
+              : 'var(--accent)',
+            borderRadius: '1px',
+            transition: `width ${DURATION.fast}s`
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Native input — invisible but functional */}
+        <input
+          id={`slider-${key}`}
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          disabled={disabled}
+          aria-label={`${label}: ${format(value)}`}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          aria-valuetext={format(value)}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            opacity: 0,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            zIndex: 1
+          }}
+        />
+
+        {/* Thumb indicator */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: `${percentage}%`,
+            transform: 'translate(-50%, -50%)',
+            width: '14px',
+            height: '14px',
+            borderRadius: '50%',
+            backgroundColor: disabled
+              ? 'var(--border-strong)'
+              : 'var(--accent)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* Description */}
+      <p
         style={{
-          width: '100%',
-          accentColor: 'var(--accent)',
-          cursor: 'pointer',
-          height: '4px'
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '11px',
+          fontWeight: 400,
+          color: 'var(--text-tertiary)',
+          margin: '6px 0 0',
+          lineHeight: 1.4
         }}
-        aria-label={`${config.label}: ${displayValue}`}
-        aria-valuemin={config.min}
-        aria-valuemax={config.max}
-        aria-valuenow={value}
-        aria-valuetext={displayValue}
-      />
+      >
+        {description}
+      </p>
     </div>
   )
 }
 
-function WhatIfOutput({ prediction, basePrediction, diffs, inferenceMs }) {
-  if (!prediction) return null
+// ─── PREDICTION OUTPUT ────────────────────────────────────
 
-  const DiffIndicator = ({ value, unit, invertSign = false }) => {
-    const isPositive = invertSign ? value < 0 : value > 0
-    const isNeutral  = value === 0
-    const color = isNeutral
-      ? 'var(--text-tertiary)'
-      : isPositive
-      ? 'var(--warning)'
-      : 'var(--success)'
-
-    const formatted = unit === 'inr'
-      ? `₹${Math.abs(Math.round(value)).toLocaleString('en-IN')}`
-      : `${Math.abs(Math.round(value))} days`
-
-    return (
-      <span
+function WhatIfOutput({
+  currentPrediction,
+  basePrediction,
+  diffs,
+  isInferring
+}) {
+  return (
+    <div>
+      <p
         style={{
           fontFamily: 'var(--font-general-sans)',
-          fontSize: '12px',
-          fontWeight: 400,
-          color,
-          marginLeft: '6px'
+          fontSize: '11px',
+          fontWeight: 500,
+          color: 'var(--text-tertiary)',
+          letterSpacing: '+0.08em',
+          textTransform: 'uppercase',
+          margin: '0 0 16px'
         }}
-        aria-label={`Change: ${value > 0 ? 'increase' : 'decrease'} of ${formatted}`}
       >
-        {isNeutral
-          ? '—'
-          : `${value > 0 ? '↑' : '↓'} ${formatted}`}
-      </span>
-    )
-  }
+        Updated estimate
+      </p>
 
-  return (
-    <div
-      style={{
-        position: 'sticky',
-        top: '24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px'
-      }}
-    >
-      {/* Duration output */}
+      {/* Collab path — primary focus */}
       <div
         style={{
+          marginBottom: '24px',
+          padding: '20px',
           backgroundColor: 'var(--bg-raised)',
-          borderRadius: '8px',
-          padding: '16px'
+          borderRadius: '10px',
+          position: 'relative'
         }}
       >
         <p
@@ -449,33 +578,41 @@ function WhatIfOutput({ prediction, basePrediction, diffs, inferenceMs }) {
             fontSize: '11px',
             fontWeight: 500,
             color: 'var(--text-tertiary)',
-            letterSpacing: '+0.08em',
+            letterSpacing: '+0.06em',
             textTransform: 'uppercase',
-            margin: '0 0 8px'
+            margin: '0 0 12px'
           }}
         >
           Collaborative path
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+        {/* Duration */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '12px',
+            marginBottom: '8px'
+          }}
+        >
           <motion.span
-            key={prediction.collab_duration}
-            initial={{ opacity: 0 }}
+            key={currentPrediction?.collab?.duration_days}
+            initial={{ opacity: 0.4 }}
             animate={{ opacity: 1 }}
             transition={{ duration: DURATION.fast }}
             style={{
               fontFamily: 'var(--font-fraunces)',
-              fontSize: '40px',
+              fontSize: '48px',
               fontWeight: 300,
               color: 'var(--text-primary)',
               letterSpacing: '-0.03em',
               lineHeight: 1,
               fontVariantNumeric: 'proportional-nums'
             }}
-            aria-live="polite"
-            aria-label={`${prediction.collab_duration} days`}
           >
-            {prediction.collab_duration}
+            {currentPrediction?.collab?.duration_days ||
+              basePrediction?.collab?.duration_days ||
+              '—'}
           </motion.span>
           <span
             style={{
@@ -486,153 +623,190 @@ function WhatIfOutput({ prediction, basePrediction, diffs, inferenceMs }) {
           >
             days
           </span>
-          {diffs && (
-            <DiffIndicator value={diffs.duration} unit="days" />
-          )}
-        </div>
-      </div>
 
-      {/* Cost output */}
-      <div
-        style={{
-          backgroundColor: 'var(--bg-raised)',
-          borderRadius: '8px',
-          padding: '16px'
-        }}
-      >
-        <p
+          {/* Diff indicator */}
+          <AnimatePresence mode="wait">
+            {diffs?.duration_days !== undefined &&
+             diffs.duration_days !== 0 && (
+              <motion.span
+                key={diffs.duration_days}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: DURATION.fast }}
+                style={{
+                  fontFamily: 'var(--font-general-sans)',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: diffs.duration_days > 0
+                    ? 'var(--danger)'
+                    : 'var(--success)',
+                  letterSpacing: '+0.01em'
+                }}
+              >
+                {diffs.duration_days > 0 ? '+' : ''}
+                {diffs.duration_days}d
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Cost */}
+        <div
           style={{
-            fontFamily: 'var(--font-general-sans)',
-            fontSize: '11px',
-            fontWeight: 500,
-            color: 'var(--text-tertiary)',
-            letterSpacing: '+0.08em',
-            textTransform: 'uppercase',
-            margin: '0 0 8px'
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '4px'
           }}
         >
-          Estimated cost
-        </p>
-
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
           <span
             style={{
-              fontFamily: 'var(--font-fraunces)',
-              fontSize: '20px',
-              fontWeight: 300,
-              color: 'var(--text-tertiary)',
-              lineHeight: 1
+              fontFamily: 'var(--font-general-sans)',
+              fontSize: '11px',
+              color: 'var(--text-tertiary)'
             }}
           >
             ₹
           </span>
           <motion.span
-            key={prediction.collab_cost}
-            initial={{ opacity: 0 }}
+            key={currentPrediction?.collab?.cost_inr}
+            initial={{ opacity: 0.4 }}
             animate={{ opacity: 1 }}
             transition={{ duration: DURATION.fast }}
             style={{
               fontFamily: 'var(--font-fraunces)',
-              fontSize: '24px',
+              fontSize: '22px',
               fontWeight: 300,
               color: 'var(--text-primary)',
-              fontVariantNumeric: 'tabular-nums'
+              fontVariantNumeric: 'proportional-nums'
             }}
-            aria-live="polite"
           >
-            {Math.round(prediction.collab_cost).toLocaleString('en-IN')}
+            {formatINR(
+              currentPrediction?.collab?.cost_inr ||
+              basePrediction?.collab?.cost_inr ||
+              0
+            )}
           </motion.span>
-          {diffs && (
-            <DiffIndicator value={diffs.cost} unit="inr" />
-          )}
         </div>
       </div>
 
-      {/* Risk output */}
+      {/* Med + Court compact comparison */}
       <div
         style={{
-          backgroundColor: 'var(--bg-raised)',
-          borderRadius: '8px',
-          padding: '16px'
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '8px'
         }}
       >
+        {[
+          {
+            path:  'med',
+            label: 'Mediation',
+            data:  currentPrediction?.med ||
+                   basePrediction?.med
+          },
+          {
+            path:  'court',
+            label: 'Court',
+            data:  currentPrediction?.court ||
+                   basePrediction?.court
+          }
+        ].map(({ path, label, data }) => (
+          <div
+            key={path}
+            style={{
+              padding: '12px',
+              backgroundColor: 'var(--bg-raised)',
+              borderRadius: '8px'
+            }}
+          >
+            <p
+              style={{
+                fontFamily: 'var(--font-general-sans)',
+                fontSize: '10px',
+                fontWeight: 500,
+                color: 'var(--text-tertiary)',
+                letterSpacing: '+0.06em',
+                textTransform: 'uppercase',
+                margin: '0 0 6px'
+              }}
+            >
+              {label}
+            </p>
+            <motion.p
+              key={data?.duration_days}
+              initial={{ opacity: 0.4 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: DURATION.fast }}
+              style={{
+                fontFamily: 'var(--font-fraunces)',
+                fontSize: '20px',
+                fontWeight: 300,
+                color: 'var(--text-secondary)',
+                margin: 0,
+                fontVariantNumeric: 'tabular-nums'
+              }}
+            >
+              {data?.duration_days || '—'}d
+            </motion.p>
+          </div>
+        ))}
+      </div>
+
+      {/* Inference time indicator — transparent */}
+      {isInferring && (
         <p
           style={{
             fontFamily: 'var(--font-general-sans)',
-            fontSize: '11px',
-            fontWeight: 500,
-            color: 'var(--text-tertiary)',
-            letterSpacing: '+0.08em',
-            textTransform: 'uppercase',
-            margin: '0 0 8px'
-          }}
-        >
-          Risk score
-        </p>
-
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-          <motion.span
-            key={prediction.risk_score}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: DURATION.fast }}
-            style={{
-              fontFamily: 'var(--font-fraunces)',
-              fontSize: '40px',
-              fontWeight: 300,
-              color: 'var(--text-primary)',
-              letterSpacing: '-0.03em',
-              lineHeight: 1,
-              fontVariantNumeric: 'proportional-nums'
-            }}
-            aria-live="polite"
-          >
-            {prediction.risk_score}
-          </motion.span>
-          {diffs && (
-            <DiffIndicator
-              value={diffs.risk}
-              unit="points"
-              invertSign
-              // Higher risk = worse, so invert colour signal
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Inference time — dev reference */}
-      {inferenceMs !== null && (
-        <p
-          style={{
-            fontFamily: 'var(--font-geist-mono)',
             fontSize: '10px',
-            color: 'var(--text-tertiary)',
-            margin: 0,
-            opacity: 0.5,
+            color: 'var(--text-disabled)',
+            margin: '8px 0 0',
             textAlign: 'right'
           }}
-          aria-label={`Inference time: ${inferenceMs} milliseconds`}
         >
-          {inferenceMs}ms
+          Computing...
         </p>
       )}
     </div>
   )
 }
 
-function WhatIfSkeleton() {
-  return (
-    <motion.div
-      animate={{ opacity: [0.4, 0.8, 0.4] }}
-      transition={{ repeat: Infinity, duration: 1.2 }}
-      style={{
-        backgroundColor: 'var(--bg-surface)',
-        borderRadius: '12px',
-        padding: '24px',
-        height: '320px'
-      }}
-      aria-busy="true"
-      aria-label="Loading scenario explorer"
-    />
+// ─── HELPERS ──────────────────────────────────────────────
+
+function extractBasePrediction(mlPrediction) {
+  if (!mlPrediction) return null
+  return {
+    collab: mlPrediction.paths?.collab || null,
+    med:    mlPrediction.paths?.med    || null,
+    court:  mlPrediction.paths?.court  || null
+  }
+}
+
+function getDemoScale(overrides, currentValues) {
+  // Simple scaling for demo — asset value drives duration
+  const assetChange = (
+    (overrides.total_asset_value_inr || currentValues.total_asset_value_inr) /
+    12800000
   )
+  const urgencyMultiplier =
+    (overrides.urgency ?? currentValues.urgency) >= 2 ? 0.85 : 1.0
+
+  return Math.max(
+    0.6,
+    Math.min(2.0, Math.sqrt(assetChange) * urgencyMultiplier)
+  )
+}
+
+function formatINR(amount) {
+  if (!amount || amount === 0) return '0'
+  if (amount >= 10000000) {
+    return `${(amount / 10000000).toFixed(1)}Cr`
+  }
+  if (amount >= 100000) {
+    return `${(amount / 100000).toFixed(1)}L`
+  }
+  if (amount >= 1000) {
+    return `${(amount / 1000).toFixed(0)}K`
+  }
+  return String(Math.round(amount))
 }

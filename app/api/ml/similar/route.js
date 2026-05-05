@@ -1,4 +1,4 @@
-﻿// app/api/ml/similar/route.js
+// app/api/ml/similar/route.js
 
 import { NextResponse } from 'next/server'
 import { checkDemoMode, demoResponse } from '@/lib/demo/demoMode'

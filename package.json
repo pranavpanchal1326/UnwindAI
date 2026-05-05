@@ -1,8 +1,7 @@
 {
   "name": "unwindai",
   "version": "2.0.0",
-  "private": true, 
-  
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -54,7 +53,7 @@
     "next": "15.1.0",
     "node-cron": "3.0.3",
     "onnxruntime-node": "1.20.1",
-    "onnxruntime-web": "1.20.1",
+    "onnxruntime-web": "^1.25.1",
     "otplib": "12.0.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",

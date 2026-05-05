@@ -13,7 +13,6 @@ const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-fraunces',
   display: 'swap',
-  weight: ['300', '400'],
   style: ['normal', 'italic'],
   axes: ['SOFT', 'WONK']
   // Variable font axes for warmth control
@@ -21,6 +20,7 @@ const fraunces = Fraunces({
 
 // General Sans — from Fontshare (local font file)
 // Must be downloaded from fontshare.com and placed in public/fonts/
+/*
 const generalSans = localFont({
   src: [
     {
@@ -42,6 +42,8 @@ const generalSans = localFont({
   variable: '--font-general-sans',
   display: 'swap'
 })
+*/
+const generalSans = { variable: 'font-sans' };
 
 // Geist Mono — technical strings only
 const geistMono = Geist_Mono({

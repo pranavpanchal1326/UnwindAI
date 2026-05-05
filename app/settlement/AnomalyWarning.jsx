@@ -1,7 +1,8 @@
 // app/settlement/AnomalyWarning.jsx
 'use client'
-// E8: "Unusual case: run predict ? anomaly warning shown
-//      with wider confidence interval"
+// Block E8: "Unusual case: run predict →
+//            Anomaly warning shown with wider confidence interval"
+// From design rules: soft warning — never aggressive
 
 import { motion } from 'framer-motion'
 import { MESSAGE_VARIANTS } from '@/lib/constants/animations'
@@ -14,53 +15,41 @@ export function AnomalyWarning({ anomalyScore }) {
       animate="visible"
       style={{
         backgroundColor: 'var(--warning-soft)',
-        borderRadius: '12px',
-        padding: '16px 20px',
-        border: '1px solid var(--warning)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '12px'
+        borderRadius: '8px',
+        padding: '14px 18px',
+        marginBottom: '24px',
+        border: '1px solid var(--warning-soft)',
+        borderLeft: '3px solid var(--warning)'
       }}
       role="alert"
-      aria-live="polite"
+      aria-label="Case complexity notice"
     >
-      <span
-        style={{ fontSize: '16px', flexShrink: 0 }}
-        aria-hidden="true"
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '13px',
+          fontWeight: 500,
+          color: 'var(--warning)',
+          margin: '0 0 4px'
+        }}
       >
-        ?
-      </span>
-
-      <div>
-        <p
-          style={{
-            fontFamily: 'var(--font-general-sans)',
-            fontSize: '13px',
-            fontWeight: 500,
-            color: 'var(--warning)',
-            margin: '0 0 4px',
-            letterSpacing: '+0.02em'
-          }}
-        >
-          Unusual case profile
-        </p>
-        <p
-          style={{
-            fontFamily: 'var(--font-general-sans)',
-            fontSize: '13px',
-            fontWeight: 400,
-            color: 'var(--text-secondary)',
-            lineHeight: 1.5,
-            margin: 0
-          }}
-        >
-          Your case has some characteristics that are uncommon
-          in our training data. We have shown wider estimate
-          ranges to reflect this uncertainty. These projections
-          are still based on the closest similar cases we could
-          find.
-        </p>
-      </div>
+        Your case is more complex than most
+      </p>
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '13px',
+          fontWeight: 400,
+          color: 'var(--text-secondary)',
+          lineHeight: 1.5,
+          margin: 0
+        }}
+      >
+        Our estimates are based on 200,000 cases.
+        Your case falls outside the most common patterns,
+        so the ranges shown below are wider than usual.
+        Your lawyer can give you more specific guidance.
+      </p>
     </motion.div>
   )
 }

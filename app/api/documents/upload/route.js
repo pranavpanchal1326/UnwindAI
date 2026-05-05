@@ -18,7 +18,7 @@ import {
 
 export async function POST(request) {
   try {
-    // STEP 1: DEMO_MODE — always first
+    // STEP 1: DEMO_MODE - always first
     const demo = await checkDemoMode('dashboard')
     if (demo) {
       return NextResponse.json(
@@ -36,7 +36,7 @@ export async function POST(request) {
     // STEP 2: Parse multipart form data
     const formData      = await request.formData()
     const encryptedFile = formData.get('encrypted_file')
-    // This is ALREADY encrypted — server never sees original
+    // This is ALREADY encrypted - server never sees original
     const keyHash       = formData.get('key_hash')
     const ivBase64      = formData.get('iv_base64')
     const label         = formData.get('label')
@@ -78,14 +78,14 @@ export async function POST(request) {
     )
 
     // STEP 6: Save document record to Supabase
-    // ONLY the hash — never raw content, never decryption key
+    // ONLY the hash - never raw content, never decryption key
     const supabase = createSupabaseAdminClient()
 
     const documentRecord = {
       case_id:            caseId,
       ipfs_hash:          ipfsResult.ipfsHash,
       encrypted_key_hash: keyHash,
-      // SHA-256 hash of key — used for access log verification
+      // SHA-256 hash of key - used for access log verification
       label,
       document_type:      documentType,
       uploaded_by:        userId,
@@ -97,7 +97,7 @@ export async function POST(request) {
           by:        userId,
           at:        new Date().toISOString(),
           key_hash:  keyHash
-          // Audit trail entry — immutable once written
+          // Audit trail entry - immutable once written
         }
       ]
     }

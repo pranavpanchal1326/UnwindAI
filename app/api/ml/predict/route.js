@@ -1,4 +1,4 @@
-﻿// app/api/ml/predict/route.js
+// app/api/ml/predict/route.js
 // Complete ML prediction route
 // DEMO_MODE: returns predict_meera.json in < 50ms
 
@@ -7,16 +7,11 @@ import {
   checkDemoMode,
   demoResponse
 } from '@/lib/demo/demoMode'
-import {
-  checkAICallAllowed
-} from '@/lib/ai/ratelimit_updated'
-import { predictOutcome } from '@/lib/ml/predictor'
-import { createSupabaseAdminClient } from '@/lib/db/client'
-import { logMLPrediction } from '@/lib/db/cases'
 
 export async function POST(request) {
   try {
     // STEP 1: DEMO_MODE — always first
+    // Minimal overhead before this check
     const demo = await checkDemoMode('predict')
     if (demo) {
       return NextResponse.json(
@@ -24,6 +19,19 @@ export async function POST(request) {
         { status: 200 }
       )
     }
+
+    // Lazy load heavy dependencies only if NOT in DEMO_MODE
+    const [
+      { checkAICallAllowed },
+      { predictOutcome },
+      { createSupabaseAdminClient },
+      { logMLPrediction }
+    ] = await Promise.all([
+      import('@/lib/ai/ratelimit_updated'),
+      import('@/lib/ml/predictor'),
+      import('@/lib/db/client'),
+      import('@/lib/db/cases')
+    ])
 
     const { case_id, features } = await request.json()
 

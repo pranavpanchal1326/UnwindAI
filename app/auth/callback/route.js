@@ -1,6 +1,6 @@
-﻿// app/auth/callback/route.js
+// app/auth/callback/route.js
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/db/client'
+import { createSupabaseServerClient } from '@/lib/db/server'
 import { ensureUserRecord } from '@/lib/auth/users'
 
 export async function GET(request) {

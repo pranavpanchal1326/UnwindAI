@@ -1,9 +1,8 @@
-﻿// app/dashboard/RiskScoreDisplay.jsx
+// app/dashboard/RiskScoreDisplay.jsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
 import { TRANSITIONS, DURATION } from '@/lib/constants/animations'
 
 /**
@@ -143,7 +142,7 @@ export function RiskScoreDisplay({ riskSnapshot, caseId }) {
       />
 
       {/* View full prediction link */}
-      <Link
+      <a
         href="/settlement"
         style={{
           fontFamily: 'var(--font-general-sans)',
@@ -157,7 +156,7 @@ export function RiskScoreDisplay({ riskSnapshot, caseId }) {
         aria-label="View full settlement predictions"
       >
         View all paths →
-      </Link>
+      </a>
     </div>
   )
 }

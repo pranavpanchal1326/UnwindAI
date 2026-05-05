@@ -1,4 +1,4 @@
-﻿// app/components/ui/EmptyState.jsx
+// app/components/ui/EmptyState.jsx
 'use client'
 // FE-02: "Empty states designed for all 6 screens.
 //         Copy defined in EMPTY_STATES constants."

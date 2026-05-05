@@ -1,4 +1,4 @@
-﻿// scripts/verify/verify_6_whatif.js
+// scripts/verify/verify_6_whatif.js
 
 async function runVerification() {
   const results = {}

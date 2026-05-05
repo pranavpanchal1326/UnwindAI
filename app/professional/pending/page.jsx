@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Clock3 } from "lucide-react";
-import { createBrowserSupabaseClient } from "@/lib/db/client";
+import { createSupabaseBrowserClient } from "@/lib/db/client";
 
 export default function ProfessionalPendingPage() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function ProfessionalPendingPage() {
     setIsSigningOut(true);
 
     try {
-      const supabase = createBrowserSupabaseClient();
+      const supabase = createSupabaseBrowserClient();
       await supabase.auth.signOut();
     } finally {
       router.replace("/auth/professional-login");

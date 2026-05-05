@@ -1,6 +1,6 @@
 // app/api/documents/access/route.js
 // Controls professional access to encrypted documents
-// Grants 48-hour access keys — Law 2 compliance
+// Grants 48-hour access keys - Law 2 compliance
 
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/db/client'
@@ -10,7 +10,7 @@ import {
   EVENTS
 } from '@/lib/realtime/channels'
 
-// GET — list documents accessible to requester
+// GET - list documents accessible to requester
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -36,7 +36,7 @@ export async function GET(request) {
       .eq('case_id', caseId)
       .eq('is_deleted', false)
 
-    // Role-based document type filtering — Law 1
+    // Role-based document type filtering - Law 1
     if (professionalId) {
       const { data: prof } = await supabase
         .from('professionals')
@@ -57,9 +57,9 @@ export async function GET(request) {
           'property_deed', 'valuation_report'
         ],
         mediator:   [],
-        // Mediator sees summaries only — handled at API level
+        // Mediator sees summaries only - handled at API level
         therapist:  []
-        // Therapist sees no documents — Law 1
+        // Therapist sees no documents - Law 1
       }
 
       const allowedTypes = ROLE_DOC_ACCESS[prof?.role] || []
@@ -86,7 +86,7 @@ export async function GET(request) {
       document_type: doc.document_type,
       uploaded_at:   doc.uploaded_at,
       file_size_bytes: doc.file_size_bytes
-      // access_log excluded — users only
+      // access_log excluded - users only
     })) || []
 
     return NextResponse.json({ documents: sanitized })
@@ -100,7 +100,7 @@ export async function GET(request) {
   }
 }
 
-// POST — grant professional access to a document
+// POST - grant professional access to a document
 export async function POST(request) {
   try {
     const {
@@ -108,7 +108,7 @@ export async function POST(request) {
       case_id,
       professional_id,
       user_id,
-      // User must approve — never auto-grant
+      // User must approve - never auto-grant
       granted_by_user: grantedByUser
     } = await request.json()
 
@@ -122,7 +122,7 @@ export async function POST(request) {
 
     const supabase = createSupabaseAdminClient()
 
-    // Verify case ownership — only case owner can grant access
+    // Verify case ownership - only case owner can grant access
     const { data: caseRecord } = await supabase
       .from('cases')
       .select('user_id')
@@ -152,12 +152,12 @@ export async function POST(request) {
       )
     }
 
-    // Calculate 48-hour expiry — Law 2
+    // Calculate 48-hour expiry - Law 2
     const expiresAt = new Date(
       Date.now() + 48 * 60 * 60 * 1000
     ).toISOString()
 
-    // Append to access_log — immutable audit trail
+    // Append to access_log - immutable audit trail
     const { data: doc } = await supabase
       .from('documents')
       .select('access_log')

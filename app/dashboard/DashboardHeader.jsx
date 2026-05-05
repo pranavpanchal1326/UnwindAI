@@ -1,4 +1,4 @@
-﻿// app/dashboard/DashboardHeader.jsx
+// app/dashboard/DashboardHeader.jsx
 'use client'
 
 import { motion } from 'framer-motion'

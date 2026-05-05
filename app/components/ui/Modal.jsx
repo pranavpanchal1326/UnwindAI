@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TRANSITIONS, VARIANTS } from '../../lib/constants/animations'
+import { TRANSITIONS, VARIANTS } from '@lib/constants/animations'
 
 /**
  * @param {boolean} props.isOpen

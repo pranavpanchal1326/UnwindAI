@@ -1,4 +1,4 @@
-﻿// app/dashboard/TimelineSummary.jsx
+// app/dashboard/TimelineSummary.jsx
 'use client'
 
 import { motion } from 'framer-motion'

@@ -1,4 +1,4 @@
-﻿// app/dashboard/SituationRoom.jsx
+// app/dashboard/SituationRoom.jsx
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -10,7 +10,7 @@ import {
   usePredictionUpdates,
   useDeadlineBrain,
   useEmotionShieldAlerts
-} from '@/lib/realtime/useChannel.js'
+} from '@/lib/realtime/useChannel'
 import { DashboardHeader } from './DashboardHeader'
 import { RiskScoreDisplay } from './RiskScoreDisplay'
 import { ProfessionalGrid } from './ProfessionalGrid'
@@ -124,6 +124,8 @@ export function SituationRoom({
   )
 
   // ─── PRIVATE MODE ──────────────────────────────────────────
+  // From document: "Private Mode activates in under 100ms
+  //                 — it is a safety feature, not a UI feature"
   const togglePrivateMode = useCallback(() => {
     setPrivateMode(prev => !prev)
   }, [])
@@ -177,22 +179,14 @@ export function SituationRoom({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1fr)',
-              // Mobile: single column
-              gap: '24px'
+              gridTemplateColumns: '1fr 320px',
+              gap: '32px',
+              alignItems: 'start'
             }}
-            className="md:grid-cols-dashboard"
           >
-            {/* Mobile: Risk score appears FIRST on mobile */}
-            <div className="md:order-2 md:col-start-2">
-              <RiskScoreDisplay
-                riskSnapshot={riskSnapshot}
-                caseId={caseId}
-              />
-            </div>
-
-            {/* Professionals + decisions — full width */}
-            <div className="md:order-1">
+            {/* Left column — professionals */}
+            <div>
+              {/* Decision inbox badge — compact version */}
               <AnimatePresence>
                 {pendingDecisions.length > 0 && (
                   <DecisionInboxBadge
@@ -202,18 +196,36 @@ export function SituationRoom({
                   />
                 )}
               </AnimatePresence>
-              <section style={{ marginTop: '24px' }}>
+
+              {/* Professional grid */}
+              <section
+                aria-label="Your professional team"
+                style={{ marginTop: '24px' }}
+              >
                 <ProfessionalGrid
                   professionals={professionals}
                   isLoading={isLoading}
                 />
               </section>
-              <section style={{ marginTop: '32px' }}>
+
+              {/* Timeline summary */}
+              <section
+                aria-label="Case timeline"
+                style={{ marginTop: '32px' }}
+              >
                 <TimelineSummary
                   caseState={caseState?.case}
                   profile={caseState?.profile}
                 />
               </section>
+            </div>
+
+            {/* Right column — risk + stats */}
+            <div style={{ position: 'sticky', top: '24px' }}>
+              <RiskScoreDisplay
+                riskSnapshot={riskSnapshot}
+                caseId={caseId}
+              />
             </div>
           </div>
         )}
@@ -228,19 +240,18 @@ function DashboardSkeleton() {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr)',
+        gridTemplateColumns: '1fr 320px',
         gap: '32px'
       }}
-      className="md:grid-cols-dashboard"
       aria-busy="true"
       aria-label="Loading dashboard"
     >
-      <div className="md:order-1">
+      <div>
         {[0, 1, 2, 3, 4].map(i => (
           <ProfessionalCardSkeleton key={i} delay={i * 0.05} />
         ))}
       </div>
-      <div className="md:order-2">
+      <div>
         <RiskScoreSkeleton />
       </div>
     </div>
@@ -262,6 +273,7 @@ function ProfessionalCardSkeleton({ delay = 0 }) {
         backgroundColor: 'var(--bg-surface)',
         borderRadius: '12px',
         marginBottom: '12px',
+        // Card shape skeleton — matches actual card
       }}
       aria-hidden="true"
     />

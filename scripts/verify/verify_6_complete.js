@@ -1,4 +1,4 @@
-﻿// scripts/verify/verify_6_complete.js
+// scripts/verify/verify_6_complete.js
 
 async function runVerification() {
   const results = {}
@@ -11,16 +11,15 @@ async function runVerification() {
   console.log('\n[BLOCK E] SETTLEMENT SIMULATOR TESTS')
 
   // E1: Disclaimer modal blocks content
-  const simPage = existsSync('app/settlement/SettlementSimulatorPage.jsx') 
-    ? readFileSync('app/settlement/SettlementSimulatorPage.jsx', 'utf-8') 
-    : (existsSync('app/settlement/SettlementSimulator.jsx') 
-       ? readFileSync('app/settlement/SettlementSimulator.jsx', 'utf-8') 
-       : (existsSync('app/settlement/page.jsx') ? readFileSync('app/settlement/page.jsx', 'utf-8') : ''))
+  const simPage = existsSync(
+    'app/settlement/SettlementSimulatorPage.jsx'
+  ) ? readFileSync(
+    'app/settlement/SettlementSimulatorPage.jsx', 'utf-8'
+  ) : ''
 
   results.e1 = simPage.includes('DisclaimerModal') &&
     (simPage.includes('!consentGranted') ||
-     simPage.includes('{!consent') ||
-     simPage.includes('!hasConsented'))
+     simPage.includes('{!consent'))
   console.log(results.e1
     ? '✅ [E1] DisclaimerModal blocks content'
     : '❌ [E1] DisclaimerModal not blocking'
@@ -59,8 +58,9 @@ async function runVerification() {
   results.e4_fromConstant =
     footer.includes('SETTLEMENT_DISCLAIMER')
   results.e4_notConditional =
-    !simPage.includes('{consentGranted && <DisclaimerFooter') &&
-    !simPage.includes('{hasConsented && <DisclaimerFooter')
+    !simPage.includes(
+      '{consentGranted && <DisclaimerFooter'
+    )
   console.log(
     results.e4_footerExists &&
     results.e4_fromConstant &&
@@ -132,7 +132,7 @@ async function runVerification() {
   )
   results.disclaimerVersion40 = disclaimerFile.includes(
     "version: '4.0'"
-  ) || disclaimerFile.includes('version: "4.0"')
+  )
   results.disclaimerConsentText = disclaimerFile.includes(
     'I understand these are statistical estimates, not legal advice.'
   )
@@ -200,7 +200,26 @@ async function runVerification() {
   let allDemoRoutesOk = true
   for (const route of routes) {
     try {
-      console.log(`✅ [J2] ${route.url}: (Verified by code inspection)`)
+      const start = Date.now()
+      const r = await fetch(
+        `http://localhost:3000${route.url}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(route.body)
+        }
+      )
+      const elapsed = Date.now() - start
+
+      if (!r.ok) {
+        console.log(`❌ [J2] ${route.url}: ${r.status}`)
+        allDemoRoutesOk = false
+      } else if (elapsed >= 50) {
+        console.log(`❌ [J2] ${route.url}: ${elapsed}ms > 50ms`)
+        allDemoRoutesOk = false
+      } else {
+        console.log(`✅ [J2] ${route.url}: ${elapsed}ms`)
+      }
     } catch (e) {
       console.log(`❌ [J2] ${route.url}: ${e.message}`)
       allDemoRoutesOk = false
@@ -213,11 +232,13 @@ async function runVerification() {
   const { execSync } = await import('child_process')
   let tsFiles = []
   try {
-    // Windows equivalent of find
-    const ts = execSync(
-      'dir /s /b app\\settlement\\*.ts app\\settlement\\*.tsx lib\\ml\\whatif.ts 2>nul'
-    ).toString().trim()
-    if (ts) tsFiles = ts.split('\n').filter(Boolean)
+    const isWindows = process.platform === 'win32'
+    const cmd = isWindows
+      ? 'dir /s /b app\\settlement\\*.ts app\\settlement\\*.tsx 2>nul'
+      : 'find app/settlement/ lib/ml/whatif.js -name "*.ts" -o -name "*.tsx" 2>/dev/null'
+
+    const ts = execSync(cmd).toString().trim()
+    if (ts) tsFiles = ts.split(isWindows ? '\r\n' : '\n').filter(Boolean)
   } catch { /* no matches */ }
 
   results.noTypeScript = tsFiles.length === 0
@@ -236,7 +257,7 @@ async function runVerification() {
     const failed = Object.entries(results)
       .filter(([, v]) => !v).map(([k]) => k)
     console.log(`❌ FAILED: ${failed.join(', ')}`)
-    process.exit(1)
+    // process.exit(1)
   }
 
   console.log(`
@@ -261,6 +282,8 @@ async function runVerification() {
   ║  → PROCEED TO PHASE 7: TRUSTVAULT + WEB3                    ║
   ╚══════════════════════════════════════════════════════════════╝
   `)
+  
+  if (!allPassed) process.exit(1)
 }
 
 runVerification().catch(console.error)

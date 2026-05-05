@@ -1,7 +1,9 @@
 // app/api/settings/consent/route.js
+// Logs consent to consent_logs — DPDP compliance
+// Called by DisclaimerModal onConsent handler
 
 import { NextResponse } from 'next/server'
-import { logConsent } from '@/lib/db/professionals'
+import { createSupabaseAdminClient } from '@/lib/db/client'
 
 export async function POST(request) {
   try {
@@ -9,7 +11,7 @@ export async function POST(request) {
       user_id,
       consent_type,
       consented,
-      version
+      consent_version
     } = await request.json()
 
     if (!user_id || !consent_type) {
@@ -19,34 +21,40 @@ export async function POST(request) {
       )
     }
 
-    const validTypes = [
-      'emotion_shield', 'settlement_disclaimer',
-      'document_upload', 'professional_access',
-      'whatsapp_notifications', 'data_processing',
-      'terms_of_service'
-    ]
+    const supabase = createSupabaseAdminClient()
 
-    if (!validTypes.includes(consent_type)) {
+    // Append to consent_logs — NEVER update existing rows
+    const { error } = await supabase
+      .from('consent_logs')
+      .insert({
+        user_id,
+        consent_type,
+        consented:       consented ?? true,
+        consent_version: consent_version || '4.0',
+        timestamp:       new Date().toISOString()
+        // ip_hash: omitted — not tracking IPs in this route
+        // for hackathon scope
+      })
+
+    if (error) {
+      console.error('[Consent API] DB error:', error.message)
       return NextResponse.json(
-        { error: `Invalid consent_type: ${consent_type}` },
-        { status: 400 }
+        { error: 'Consent logging failed' },
+        { status: 500 }
       )
     }
 
-    await logConsent(user_id, consent_type, consented === true)
-
     return NextResponse.json({
-      success:    true,
+      success: true,
       consent_type,
-      consented:  consented === true,
-      logged_at:  new Date().toISOString(),
-      version:    version || '4.0'
+      consented: true,
+      logged_at: new Date().toISOString()
     })
 
   } catch (err) {
-    console.error('[Consent] Log failed:', err.message)
+    console.error('[Consent API] Error:', err.message)
     return NextResponse.json(
-      { error: 'Consent logging failed.' },
+      { error: 'Unable to log consent' },
       { status: 500 }
     )
   }

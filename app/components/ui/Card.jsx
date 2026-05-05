@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TRANSITIONS, VARIANTS } from '../../lib/constants/animations'
-import { PROFESSIONAL_STATUS } from '../../lib/constants/design'
+import { TRANSITIONS, VARIANTS } from '@lib/constants/animations'
+import { PROFESSIONAL_STATUS } from '@lib/constants/design'
 
 /**
  * @param {Object} props

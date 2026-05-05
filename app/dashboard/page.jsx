@@ -1,4 +1,4 @@
-﻿// app/dashboard/page.jsx
+// app/dashboard/page.jsx
 // Server component — validates auth, loads initial case state
 // Hands off to client SituationRoom component
 

@@ -1,4 +1,4 @@
-﻿// app/dashboard/ProfessionalGrid.jsx
+// app/dashboard/ProfessionalGrid.jsx
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
@@ -24,7 +24,7 @@ export function ProfessionalGrid({ professionals, isLoading }) {
   if (!professionals || professionals.length === 0) {
     return (
       <EmptyState
-        screen="professionals"
+        message="Matching you with the right professionals. Usually under 2 hours."
         aria-label="No professionals assigned yet"
       />
     )
@@ -39,7 +39,7 @@ export function ProfessionalGrid({ professionals, isLoading }) {
       <AnimatePresence mode="popLayout">
         {professionals.map((prof, index) => (
           <ProfessionalCard
-            key={prof.id || (prof.professional && prof.professional.id) || index}
+            key={prof.id || prof.professional?.id}
             professional={prof}
             index={index}
           />
