@@ -1,13 +1,9 @@
 // app/components/ui/PrivateMode.jsx
 'use client'
-// From document Section 08:
-// "Private Mode activates in under 100ms — it is a safety
-//  feature, not a UI feature"
-// "Private Mode: 100ms ease-out. Must feel instant."
-// "--bg-inverse screen. Tap restores in <100ms."
 
-import { motion } from 'framer-motion'
-import { TRANSITIONS } from '@/lib/constants/animations'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { TRANSITIONS } from '@lib/constants/animations'
 
 export function PrivateModeOverlay({ onClose }) {
   return (
@@ -17,7 +13,6 @@ export function PrivateModeOverlay({ onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={TRANSITIONS.privateMode}
-      // 100ms ease-out — must feel instant
       onClick={onClose}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
@@ -28,9 +23,7 @@ export function PrivateModeOverlay({ onClose }) {
         position: 'fixed',
         inset: 0,
         backgroundColor: 'var(--bg-inverse)',
-        // From design system: --bg-inverse: #1C1917 warm near-black
         zIndex: 9998,
-        // Below grain texture (9999) but above everything else
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -41,9 +34,6 @@ export function PrivateModeOverlay({ onClose }) {
       aria-modal="true"
       tabIndex={0}
     >
-      {/* Grain texture is visible here — body::before is z-9999 */}
-      {/* The grain on the dark background makes it feel premium */}
-
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -63,5 +53,33 @@ export function PrivateModeOverlay({ onClose }) {
         Tap anywhere to restore
       </motion.p>
     </motion.div>
+  )
+}
+
+export default function PrivateMode({ children }) {
+  const [active, setActive] = useState(false)
+
+  const toggle = useCallback(() => setActive(prev => !prev), [])
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      // Ctrl+Shift+P to toggle
+      if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+        toggle()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [toggle])
+
+  return (
+    <>
+      <AnimatePresence>
+        {active && <PrivateModeOverlay onClose={toggle} />}
+      </AnimatePresence>
+      <div onDoubleClick={toggle}>
+        {children}
+      </div>
+    </>
   )
 }

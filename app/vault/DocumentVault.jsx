@@ -1,324 +1,799 @@
 // app/vault/DocumentVault.jsx
 'use client'
+// Demo script: "Upload a document. Encrypting in browser.
+//               IPFS hash in Geist Mono. ProofTimeline on
+//               Polygon. Professional requests access —
+//               user approves — 48h key issued."
 
 import {
-  useState,
-  useCallback,
-  useRef
+  useState, useCallback, useEffect, useRef
 } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   MESSAGE_VARIANTS,
   TRANSITIONS
 } from '@/lib/constants/animations'
-import { useDocumentVault } from '@/lib/realtime/useChannel'
-import { UploadZone } from './UploadZone'
-import { DocumentList } from './DocumentList'
-import { EncryptionProgress } from './EncryptionProgress'
-import { KeyStoragePrompt } from './KeyStoragePrompt'
-import { EmptyState } from '@/app/components/ui'
 import {
-  validateWebCryptoSupport,
-  encryptFile,
-  exportKeyToBase64
-} from '@/lib/vault/encryption'
+  uploadDocument,
+  initializeVault
+} from '@/lib/vault'
+import { EmptyState, ErrorCard } from '@/app/components/ui'
+import { useDocumentVault } from '@/lib/realtime/useChannel'
 
 /**
  * DocumentVault
- * Complete vault UI with browser-side encryption
+ * Main vault UI component
  *
- * Upload flow:
- * 1. User selects file
- * 2. Browser encrypts using Web Crypto API (shown to user)
- * 3. IPFS hash displayed in Geist Mono
- * 4. Key storage prompt � user saves key to MetaMask
- * 5. Document listed with IPFS hash
- *
- * From demo script Section 13 (3:50�4:30):
- * "Upload a document. Encrypting in browser.
- *  IPFS hash in Geist Mono."
+ * Design rules:
+ * - IPFS hash displayed in Geist Mono — immutable truth
+ * - Upload progress states: generating key, encrypting,
+ *   uploading, verifying, complete
+ * - Never shows raw key — only formatted display version
+ * - Key storage instruction shown prominently after upload
  */
-export function DocumentVault({
-  caseId,
-  userId,
-  initialDocuments = []
-}) {
-  const [documents, setDocuments] = useState(initialDocuments)
-  const [uploadState, setUploadState] = useState('idle')
-  // idle | encrypting | uploading | key_prompt | complete | error
-  const [currentFile, setCurrentFile] = useState(null)
-  const [encryptionResult, setEncryptionResult] = useState(null)
-  const [uploadResult, setUploadResult] = useState(null)
-  const [error, setError] = useState(null)
-  const [progress, setProgress] = useState(0)
+export function DocumentVault({ caseId, userId }) {
+  const [vaultReady, setVaultReady] = useState(false)
+  const [vaultError, setVaultError] = useState(null)
+  const [documents, setDocuments] = useState([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(null)
+  const [lastUpload, setLastUpload] = useState(null)
+  const [dragOver, setDragOver] = useState(false)
 
-  // Realtime: new documents from other devices
+  const fileInputRef = useRef(null)
+
+  // ─── INITIALIZE VAULT ──────────────────────────────────────
+  useEffect(() => {
+    initializeVault().then(result => {
+      if (result.initialized) {
+        setVaultReady(true)
+      } else {
+        setVaultError(result.message || 'Vault unavailable')
+      }
+    })
+  }, [])
+
+  // ─── LOAD EXISTING DOCUMENTS ──────────────────────────────
+  useEffect(() => {
+    if (!caseId) return
+    fetch(`/api/cases/${caseId}/documents`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.documents) {
+          setDocuments(data.documents)
+        }
+      })
+      .catch(() => {})
+  }, [caseId])
+
+  // ─── REALTIME: NEW DOCUMENT UPLOADED ──────────────────────
   useDocumentVault(caseId, useCallback((update) => {
     if (update.document_id) {
-      // Refetch documents list on realtime update
-      fetchDocuments()
+      setDocuments(prev => {
+        const exists = prev.some(d => d.id === update.document_id)
+        if (exists) return prev
+        return [
+          {
+            id:            update.document_id,
+            label:         update.label || 'New document',
+            ipfs_hash:     update.ipfs_hash,
+            uploaded_at:   update.timestamp,
+            document_type: update.document_type
+          },
+          ...prev
+        ]
+      })
     }
   }, []))
 
-  const fetchDocuments = useCallback(async () => {
-    try {
-      const r = await fetch(
-        `/api/documents/access?case_id=${caseId}&user_id=${userId}`
-      )
-      if (r.ok) {
-        const data = await r.json()
-        setDocuments(data.documents || [])
-      }
-    } catch { /* non-fatal */ }
-  }, [caseId, userId])
-
-  // Handle file selection
-  const handleFileSelect = useCallback(async (file) => {
-    setError(null)
-    setCurrentFile(file)
-
-    // Validate browser support
-    try {
-      validateWebCryptoSupport()
-    } catch (err) {
-      setError(err.message)
-      return
-    }
-
-    // Validate file size (max 50MB)
-    if (file.size > 50 * 1024 * 1024) {
-      setError(
-        'File too large. Maximum size is 50MB. ' +
-        'Please compress your document first.'
-      )
-      return
-    }
+  // ─── UPLOAD HANDLER ───────────────────────────────────────
+  const handleFileUpload = useCallback(async (file) => {
+    if (!file || !vaultReady || isUploading) return
 
     // Validate file type
-    const allowedTypes = [
+    const ALLOWED_TYPES = [
       'application/pdf',
-      'image/jpeg', 'image/png', 'image/webp',
+      'image/jpeg',
+      'image/png',
+      'image/webp',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ]
 
-    if (!allowedTypes.includes(file.type)) {
-      setError(
-        'File type not supported. Please upload PDF, ' +
-        'JPG, PNG, or Word documents.'
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setVaultError(
+        'We accept PDF, Word documents, and images (JPG, PNG, WebP).'
       )
       return
     }
 
-    setUploadState('encrypting')
-    setProgress(0)
+    setIsUploading(true)
+    setVaultError(null)
+    setLastUpload(null)
 
     try {
-      // STEP 1: Encrypt in browser
-      // This is where "Encrypting in browser" happens (demo script)
-      const result = await encryptFile(file)
-      setEncryptionResult(result)
-      setProgress(50)
+      const result = await uploadDocument({
+        file,
+        documentType: inferDocumentType(file.name),
+        label:        file.name.replace(/\.[^.]+$/, ''),
+        web3Token:    process.env.NEXT_PUBLIC_WEB3_STORAGE_TOKEN ||
+                      'demo_token',
+        onProgress:   setUploadProgress
+      })
 
-      // STEP 2: Upload encrypted blob to IPFS
-      setUploadState('uploading')
-
-      const formData = new FormData()
-      formData.append('encrypted_file', result.encryptedBlob)
-      formData.append('key_hash',       result.keyHash)
-      formData.append('iv_base64',      result.ivBase64)
-      formData.append('label',          file.name)
-      formData.append('document_type',  detectDocumentType(file))
-      formData.append('case_id',        caseId)
-      formData.append('user_id',        userId)
-      formData.append('mime_type',      file.type)
-      formData.append('original_size',  String(file.size))
-
-      const uploadResponse = await fetch(
-        '/api/documents/upload',
-        { method: 'POST', body: formData }
+      // Save to Supabase via API
+      const dbResponse = await fetch(
+        `/api/cases/${caseId}/documents`,
+        {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ipfs_hash:          result.ipfs_hash,
+            encrypted_key_hash: result.encrypted_key_hash,
+            label:              result.label,
+            document_type:      result.document_type,
+            file_size_bytes:    result.original_size,
+            mime_type:          result.mime_type
+          })
+        }
       )
 
-      if (!uploadResponse.ok) {
-        const err = await uploadResponse.json()
-        throw new Error(err.error || 'Upload failed')
+      if (!dbResponse.ok) {
+        throw new Error('Document record creation failed')
       }
 
-      const uploaded = await uploadResponse.json()
-      setUploadResult(uploaded)
-      setProgress(100)
+      const dbResult = await dbResponse.json()
 
-      // STEP 3: Show key storage prompt
-      // User must save their key to MetaMask
-      setUploadState('key_prompt')
+      setLastUpload({
+        ...result,
+        document_db_id: dbResult.document_id
+      })
+
+      setDocuments(prev => [{
+        id:           dbResult.document_id,
+        label:        result.label,
+        ipfs_hash:    result.ipfs_hash,
+        uploaded_at:  result.uploaded_at,
+        document_type: result.document_type
+      }, ...prev])
 
     } catch (err) {
-      console.error('[Vault] Upload failed:', err)
-      setError(err.message)
-      setUploadState('error')
+      console.error('[Vault] Upload failed:', err.message)
+      setVaultError(
+        'Upload did not complete. Your document has not been stored. ' +
+        'Please try again.'
+      )
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(null)
     }
-  }, [caseId, userId])
+  }, [vaultReady, isUploading, caseId])
 
-  const handleKeyStored = useCallback(() => {
-    // User has stored their key � add document to list
-    if (uploadResult) {
-      setDocuments(prev => [
-        {
-          id:            uploadResult.document_id,
-          ipfs_hash:     uploadResult.ipfs_hash,
-          label:         currentFile?.name || 'Document',
-          document_type: detectDocumentType(currentFile),
-          uploaded_at:   uploadResult.uploaded_at,
-          file_size_bytes: currentFile?.size
-        },
-        ...prev
-      ])
-    }
+  // ─── DRAG AND DROP ────────────────────────────────────────
+  const handleDrop = useCallback((e) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) handleFileUpload(file)
+  }, [handleFileUpload])
 
-    // Reset state
-    setUploadState('idle')
-    setCurrentFile(null)
-    setEncryptionResult(null)
-    setUploadResult(null)
-    setProgress(0)
-    setError(null)
-  }, [uploadResult, currentFile])
-
-  const handleRetry = useCallback(() => {
-    setUploadState('idle')
-    setError(null)
-    setCurrentFile(null)
-    setEncryptionResult(null)
-    setProgress(0)
-  }, [])
+  // ─── RENDER ───────────────────────────────────────────────
+  if (!vaultReady && vaultError) {
+    return (
+      <ErrorCard
+        severity="hard"
+        message={vaultError}
+        onRetry={() => window.location.reload()}
+      />
+    )
+  }
 
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
+        maxWidth: '680px',
+        margin: '0 auto',
+        padding: '32px 24px'
       }}
     >
-      {/* Upload zone � hidden during upload flow */}
+      {/* Page header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '18px',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.015em',
+            margin: '0 0 8px'
+          }}
+        >
+          Document Vault
+        </h1>
+        <p
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '13px',
+            fontWeight: 400,
+            color: 'var(--text-tertiary)',
+            margin: 0,
+            lineHeight: 1.5
+          }}
+        >
+          Documents are encrypted in your browser before upload.
+          We never see your files.
+        </p>
+      </div>
+
+      {/* Upload zone */}
+      <motion.div
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragOver(true)
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+        animate={{
+          backgroundColor: dragOver
+            ? 'var(--accent-soft)'
+            : 'var(--bg-surface)',
+          borderColor: dragOver
+            ? 'var(--accent)'
+            : 'var(--border-default)'
+        }}
+        transition={TRANSITIONS.standard}
+        style={{
+          borderRadius: '12px',
+          border: '1.5px dashed var(--border-default)',
+          padding: '40px 24px',
+          textAlign: 'center',
+          cursor: isUploading ? 'not-allowed' : 'pointer',
+          marginBottom: '24px',
+          boxShadow:
+            '0 1px 3px rgba(0,0,0,0.04)'
+        }}
+        role="button"
+        aria-label="Upload document — click or drag and drop"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            fileInputRef.current?.click()
+          }
+        }}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) handleFileUpload(file)
+            e.target.value = ''
+          }}
+          style={{ display: 'none' }}
+          disabled={isUploading}
+          aria-hidden="true"
+        />
+
+        {/* Upload progress or idle state */}
+        <AnimatePresence mode="wait">
+          {isUploading ? (
+            <UploadProgressDisplay
+              key="progress"
+              progress={uploadProgress}
+            />
+          ) : (
+            <UploadIdleDisplay
+              key="idle"
+              vaultReady={vaultReady}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Upload error */}
       <AnimatePresence>
-        {uploadState === 'idle' && (
+        {vaultError && !isUploading && (
           <motion.div
-            key="upload-zone"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={TRANSITIONS.standard}
+            variants={MESSAGE_VARIANTS}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            style={{ marginBottom: '24px' }}
           >
-            <UploadZone onFileSelect={handleFileSelect} />
+            <ErrorCard
+              severity="soft"
+              message={vaultError}
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Encryption + upload progress */}
+      {/* Last upload result — with IPFS hash in Geist Mono */}
       <AnimatePresence>
-        {(uploadState === 'encrypting' ||
-          uploadState === 'uploading') && (
-          <EncryptionProgress
-            stage={uploadState}
-            fileName={currentFile?.name}
-            progress={progress}
-            fileSize={currentFile?.size}
+        {lastUpload && (
+          <UploadSuccessCard
+            key="success"
+            result={lastUpload}
           />
         )}
       </AnimatePresence>
 
-      {/* Key storage prompt */}
-      <AnimatePresence>
-        {uploadState === 'key_prompt' && (
-          <KeyStoragePrompt
-            encryptionResult={encryptionResult}
-            uploadResult={uploadResult}
-            onKeyStored={handleKeyStored}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Error state */}
-      <AnimatePresence>
-        {uploadState === 'error' && error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      {/* Document list */}
+      <section aria-label="Your documents">
+        {documents.length === 0 ? (
+          <EmptyState screen="documents" />
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}
+            role="list"
           >
-            <div
-              style={{
-                backgroundColor: 'var(--danger-soft)',
-                borderRadius: '12px',
-                padding: '16px 20px',
-                border: '1px solid var(--danger)'
-              }}
-              role="alert"
-            >
-              <p
-                style={{
-                  fontFamily: 'var(--font-general-sans)',
-                  fontSize: '13px',
-                  color: 'var(--danger)',
-                  margin: '0 0 8px',
-                  fontWeight: 500
-                }}
-              >
-                Upload did not complete
-              </p>
-              <p
-                style={{
-                  fontFamily: 'var(--font-general-sans)',
-                  fontSize: '13px',
-                  color: 'var(--text-secondary)',
-                  margin: '0 0 12px'
-                }}
-              >
-                {error}
-              </p>
-              <button
-                onClick={handleRetry}
-                style={{
-                  fontFamily: 'var(--font-general-sans)',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: 'var(--accent)',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  letterSpacing: '+0.02em',
-                  textTransform: 'uppercase'
-                }}
-              >
-                Try again
-              </button>
-            </div>
-          </motion.div>
+            <AnimatePresence mode="popLayout">
+              {documents.map(doc => (
+                <DocumentRow key={doc.id} document={doc} />
+              ))}
+            </AnimatePresence>
+          </div>
         )}
-      </AnimatePresence>
-
-      {/* Documents list */}
-      {documents.length === 0 &&
-       uploadState === 'idle' ? (
-        <EmptyState screen="documents" />
-      ) : (
-        <DocumentList documents={documents} />
-      )}
+      </section>
     </div>
   )
 }
 
-function detectDocumentType(file) {
-  if (!file) return 'other'
-  const name = file.name?.toLowerCase() || ''
-  if (name.includes('deed') || name.includes('property')) return 'property_deed'
-  if (name.includes('petition'))                            return 'petition'
-  if (name.includes('statement') || name.includes('bank')) return 'bank_statement'
-  if (name.includes('tax'))                                return 'tax_return'
-  if (name.includes('custody'))                            return 'custody_agreement'
-  if (name.includes('valuation'))                          return 'valuation_report'
-  if (name.includes('financial') || name.includes('fin'))  return 'financial_statement'
+// ─── UPLOAD PROGRESS DISPLAY ──────────────────────────────
+
+function UploadProgressDisplay({ progress }) {
+  const STAGE_LABELS = {
+    generating_key: 'Generating your encryption key...',
+    encrypting:     'Encrypting in your browser...',
+    uploading:      'Uploading encrypted document...',
+    verifying:      'Verifying on IPFS...',
+    complete:       'Secure. Complete.'
+  }
+
+  const label = progress?.stage
+    ? STAGE_LABELS[progress.stage] || 'Processing...'
+    : 'Starting...'
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={TRANSITIONS.standard}
+    >
+      {/* Progress bar */}
+      <div
+        style={{
+          width: '200px',
+          height: '2px',
+          backgroundColor: 'var(--border-default)',
+          borderRadius: '1px',
+          margin: '0 auto 16px',
+          overflow: 'hidden'
+        }}
+        aria-hidden="true"
+      >
+        <motion.div
+          animate={{ width: `${progress?.percent || 10}%` }}
+          transition={TRANSITIONS.standard}
+          style={{
+            height: '100%',
+            backgroundColor: 'var(--accent)',
+            borderRadius: '1px'
+          }}
+        />
+      </div>
+
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '13px',
+          fontWeight: 400,
+          color: 'var(--text-secondary)',
+          fontStyle: 'italic',
+          margin: 0
+        }}
+        role="status"
+        aria-live="polite"
+      >
+        {label}
+      </p>
+    </motion.div>
+  )
+}
+
+function UploadIdleDisplay({ vaultReady }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* Lock icon — text-based, no SVG dependency */}
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '24px',
+          margin: '0 0 12px',
+          color: 'var(--text-tertiary)'
+        }}
+        aria-hidden="true"
+      >
+        🔒
+      </p>
+
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '14px',
+          fontWeight: 500,
+          color: 'var(--text-primary)',
+          margin: '0 0 6px'
+        }}
+      >
+        {vaultReady
+          ? 'Drop a document or click to upload'
+          : 'Preparing secure vault...'}
+      </p>
+
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '12px',
+          fontWeight: 400,
+          color: 'var(--text-tertiary)',
+          margin: 0
+        }}
+      >
+        PDF, Word, JPG, PNG · Max 50MB
+      </p>
+    </motion.div>
+  )
+}
+
+// ─── UPLOAD SUCCESS CARD ──────────────────────────────────
+
+function UploadSuccessCard({ result }) {
+  const [keyRevealed, setKeyRevealed] = useState(false)
+  const [keyCopied, setKeyCopied] = useState(false)
+
+  const handleCopyKey = async () => {
+    try {
+      await navigator.clipboard.writeText(result.encryption_key_hex)
+      setKeyCopied(true)
+      setTimeout(() => setKeyCopied(false), 3000)
+    } catch {
+      // Clipboard API may not be available
+    }
+  }
+
+  return (
+    <motion.div
+      variants={MESSAGE_VARIANTS}
+      initial="hidden"
+      animate="visible"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        borderRadius: '12px',
+        padding: '20px 24px',
+        marginBottom: '24px',
+        boxShadow:
+          '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
+        borderLeft: '2px solid var(--success)'
+      }}
+    >
+      {/* Success header */}
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '12px',
+          fontWeight: 500,
+          color: 'var(--success)',
+          letterSpacing: '+0.06em',
+          textTransform: 'uppercase',
+          margin: '0 0 12px'
+        }}
+      >
+        Encrypted + stored on IPFS
+      </p>
+
+      {/* IPFS hash — Geist Mono */}
+      {/* From demo script: "IPFS hash in Geist Mono" */}
+      <div style={{ marginBottom: '16px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '11px',
+            fontWeight: 400,
+            color: 'var(--text-tertiary)',
+            margin: '0 0 4px',
+            letterSpacing: '+0.04em',
+            textTransform: 'uppercase'
+          }}
+        >
+          IPFS Content ID
+        </p>
+        <p
+          style={{
+            fontFamily: 'var(--font-geist-mono)',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: 'var(--text-primary)',
+            margin: 0,
+            wordBreak: 'break-all',
+            letterSpacing: '+0.02em',
+            lineHeight: 1.6
+          }}
+        >
+          {result.ipfs_hash}
+        </p>
+      </div>
+
+      {/* Key backup warning */}
+      <div
+        style={{
+          backgroundColor: 'var(--warning-soft)',
+          borderRadius: '8px',
+          padding: '14px',
+          marginBottom: '12px'
+        }}
+      >
+        <p
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'var(--warning)',
+            margin: '0 0 6px'
+          }}
+        >
+          Save your encryption key
+        </p>
+        <p
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.5,
+            margin: '0 0 10px'
+          }}
+        >
+          This key decrypts your document. We do not store it.
+          Save it in your MetaMask wallet or password manager now.
+        </p>
+
+        {/* Key display — toggle reveal */}
+        <div
+          style={{
+            backgroundColor: 'var(--bg-raised)',
+            borderRadius: '6px',
+            padding: '10px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            justifyContent: 'space-between'
+          }}
+        >
+          <p
+            style={{
+              fontFamily: 'var(--font-geist-mono)',
+              fontSize: '11px',
+              fontWeight: 400,
+              color: keyRevealed
+                ? 'var(--text-primary)'
+                : 'var(--text-disabled)',
+              margin: 0,
+              wordBreak: 'break-all',
+              filter: keyRevealed ? 'none' : 'blur(4px)',
+              userSelect: keyRevealed ? 'text' : 'none',
+              flex: 1,
+              letterSpacing: '+0.02em',
+              lineHeight: 1.5
+            }}
+            aria-label={
+              keyRevealed
+                ? 'Encryption key (revealed)'
+                : 'Encryption key (hidden)'
+            }
+          >
+            {keyRevealed
+              ? result.encryption_key_hex
+              : '••••••••••••••••••••••••••••••••'}
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '6px',
+              flexShrink: 0
+            }}
+          >
+            <button
+              onClick={() => setKeyRevealed(v => !v)}
+              style={{
+                fontFamily: 'var(--font-general-sans)',
+                fontSize: '11px',
+                fontWeight: 500,
+                color: 'var(--accent)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '2px 6px',
+                letterSpacing: '+0.04em',
+                textTransform: 'uppercase'
+              }}
+              aria-label={
+                keyRevealed ? 'Hide key' : 'Reveal key'
+              }
+            >
+              {keyRevealed ? 'Hide' : 'Reveal'}
+            </button>
+
+            {keyRevealed && (
+              <button
+                onClick={handleCopyKey}
+                style={{
+                  fontFamily: 'var(--font-general-sans)',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: keyCopied
+                    ? 'var(--success)'
+                    : 'var(--accent)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '2px 6px',
+                  letterSpacing: '+0.04em',
+                  textTransform: 'uppercase'
+                }}
+                aria-label="Copy key to clipboard"
+              >
+                {keyCopied ? 'Copied' : 'Copy'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Document info */}
+      <p
+        style={{
+          fontFamily: 'var(--font-general-sans)',
+          fontSize: '12px',
+          fontWeight: 400,
+          color: 'var(--text-tertiary)',
+          margin: 0
+        }}
+      >
+        {result.label} ·{' '}
+        {Math.round(result.original_size / 1024)}KB ·{' '}
+        Encrypted {Math.round(result.encrypted_size / 1024)}KB
+      </p>
+    </motion.div>
+  )
+}
+
+// ─── DOCUMENT ROW ─────────────────────────────────────────
+
+function DocumentRow({ document: doc }) {
+  const DOCUMENT_TYPE_LABELS = {
+    property_deed:       'Property deed',
+    financial_statement: 'Financial statement',
+    petition:            'Petition',
+    correspondence:      'Correspondence',
+    custody_agreement:   'Custody agreement',
+    valuation_report:    'Valuation report',
+    tax_return:          'Tax return',
+    bank_statement:      'Bank statement',
+    identity_proof:      'Identity proof',
+    other:               'Document'
+  }
+
+  const typeLabel =
+    DOCUMENT_TYPE_LABELS[doc.document_type] || 'Document'
+
+  return (
+    <motion.div
+      variants={MESSAGE_VARIANTS}
+      initial="hidden"
+      animate="visible"
+      layout
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 16px',
+        backgroundColor: 'var(--bg-surface)',
+        borderRadius: '8px',
+        gap: '12px'
+      }}
+      role="listitem"
+      aria-label={`${doc.label} — ${typeLabel}`}
+    >
+      {/* Document info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+            margin: '0 0 2px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {doc.label}
+        </p>
+        <p
+          style={{
+            fontFamily: 'var(--font-general-sans)',
+            fontSize: '11px',
+            fontWeight: 400,
+            color: 'var(--text-tertiary)',
+            margin: 0
+          }}
+        >
+          {typeLabel} · {formatRelativeDate(doc.uploaded_at)}
+        </p>
+      </div>
+
+      {/* IPFS hash indicator — Geist Mono */}
+      <p
+        style={{
+          fontFamily: 'var(--font-geist-mono)',
+          fontSize: '10px',
+          fontWeight: 400,
+          color: 'var(--text-tertiary)',
+          margin: 0,
+          flexShrink: 0,
+          letterSpacing: '+0.02em'
+        }}
+        title={doc.ipfs_hash}
+        aria-label={`IPFS: ${doc.ipfs_hash?.slice(0, 8)}...`}
+      >
+        {doc.ipfs_hash
+          ? `${doc.ipfs_hash.slice(0, 8)}...`
+          : 'Pending'}
+      </p>
+    </motion.div>
+  )
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+
+function inferDocumentType(filename) {
+  const name = filename.toLowerCase()
+  if (name.includes('deed') || name.includes('property'))
+    return 'property_deed'
+  if (name.includes('bank') || name.includes('statement'))
+    return 'bank_statement'
+  if (name.includes('tax') || name.includes('itr'))
+    return 'tax_return'
+  if (name.includes('petition'))
+    return 'petition'
+  if (name.includes('custody') || name.includes('child'))
+    return 'custody_agreement'
   return 'other'
+}
+
+function formatRelativeDate(isoDate) {
+  if (!isoDate) return 'Just now'
+  const diff = Date.now() - new Date(isoDate).getTime()
+  const days = Math.round(diff / 86400000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  if (days < 7) return `${days} days ago`
+  return new Date(isoDate).toLocaleDateString('en-IN', {
+    month: 'short', day: 'numeric'
+  })
 }

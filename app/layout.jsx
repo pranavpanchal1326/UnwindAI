@@ -7,6 +7,7 @@
 import { Fraunces, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
+import { Web3Providers } from './providers'
 
 // Fraunces — emotional moments and data display
 const fraunces = Fraunces({
@@ -81,7 +82,9 @@ export default function RootLayout({ children }) {
           padding: 0
         }}
       >
-        {children}
+        <Web3Providers>
+          {children}
+        </Web3Providers>
         {/* body::before grain texture via CSS — see globals.css */}
       </body>
     </html>
