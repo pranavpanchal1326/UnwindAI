@@ -1,4 +1,4 @@
-﻿// app/layout.jsx
+// app/layout.jsx
 // Section 05: "layout.jsx — Root layout — font loading
 //              (Fraunces + General Sans + Geist Mono)"
 // FE-11: "Font loading: Fraunces + General Sans via next/font.
@@ -8,6 +8,7 @@ import { Fraunces, Geist_Mono } from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
 import { Web3Providers } from './providers'
+import { SyncManager } from '@/lib/resilience/SyncManager'
 
 // Fraunces — emotional moments and data display
 const fraunces = Fraunces({
@@ -83,10 +84,13 @@ export default function RootLayout({ children }) {
         }}
       >
         <Web3Providers>
+        <SyncManager />
           {children}
         </Web3Providers>
         {/* body::before grain texture via CSS — see globals.css */}
       </body>
+
+
     </html>
   )
 }

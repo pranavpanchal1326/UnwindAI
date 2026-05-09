@@ -1,4 +1,5 @@
-﻿/* @import "tailwindcss"; */
+@import "tailwindcss";
+
 
 /* ── QUIET CLARITY v4.0 TOKENS ─────────────────────────── */
 :root {
@@ -35,6 +36,11 @@
   --border-default: #D6D3D1;
   --border-strong:  #A8A29E;
   --border-focus:   #3D5A80;
+
+  /* Typography */
+  --font-fraunces: 'Fraunces', serif;
+  --font-general-sans: 'General Sans', sans-serif;
+  --font-geist-mono: 'Geist Mono', monospace;
 }
 
 /* ── GRAIN TEXTURE ──────────────────────────────────────── */

@@ -7,6 +7,16 @@ import { createSupabaseAdminClient } from '@/lib/db/client'
 
 export async function POST(request) {
   try {
+    if (process.env.DEMO_MODE === 'true') {
+      const body = await request.json();
+      return NextResponse.json({
+        success: true,
+        consent_type: body.consent_type,
+        consented: true,
+        logged_at: new Date().toISOString()
+      })
+    }
+
     const {
       user_id,
       consent_type,

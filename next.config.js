@@ -32,6 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Webpack: handle ONNX files and externals
+  /*
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = [
@@ -55,68 +56,16 @@ const nextConfig = {
 
     return config
   },
+  */
+
 
   // Security headers on every route.
+  /*
   async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "microphone=(), camera=(), geolocation=()",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.web3.storage",
-              "worker-src 'self' blob:",
-            ].join("; "),
-          },
-        ],
-      },
-      {
-        // ONNX model files in /public/models/ need correct MIME type,
-        // aggressive cache, and COOP/COEP for SharedArrayBuffer support.
-        source: "/models/:path*",
-        headers: [
-          {
-            key: "Content-Type",
-            value: "application/octet-stream",
-          },
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp'
-          },
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin'
-          }
-        ],
-      },
-    ]
+    ...
   },
+  */
+
 }
 
 module.exports = nextConfig

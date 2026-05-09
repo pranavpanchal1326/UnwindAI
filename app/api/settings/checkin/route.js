@@ -8,6 +8,17 @@ import { createSupabaseAdminClient } from '@/lib/db/client'
 
 export async function POST(request) {
   try {
+    if (process.env.DEMO_MODE === 'true') {
+      const body = await request.json();
+      return NextResponse.json({
+        success: true,
+        checked_in_at: new Date().toISOString(),
+        case_id: body.case_id,
+        blockchain_recorded: false,
+        previous_status: 'active'
+      })
+    }
+
     const { case_id } = await request.json()
 
     if (!case_id) {

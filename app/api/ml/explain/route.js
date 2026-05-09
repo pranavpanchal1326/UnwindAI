@@ -39,7 +39,7 @@ export async function POST(request) {
 
       // Dynamically import data to avoid issues
       const shapByType = await import(
-        '../../../data/shap_by_case_type.json',
+        '../../../../data/shap_by_case_type.json',
         { with: { type: 'json' } }
       )
       const typeExplanation =

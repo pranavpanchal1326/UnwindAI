@@ -1,47 +1,38 @@
 {
-  "demo_id": "meera_explain_v4",
-  "case_id": "CASE_MEERA_DEMO_001",
-  "path_explained": "collab",
-  "predicted_duration_days": 75,
-  "base_duration_days": 93,
   "explanation_cards": [
     {
-      "factor": "Court Backlog",
+      "factor": "Children involved",
       "impact": "slower",
+      "headline": "Having a child adds time",
+      "detail": "Custody schedule negotiation typically adds 12 days to the collaborative path.",
       "days_impact": 12,
-      "icon": "calendar-x",
-      "headline": "Pune court scheduling adds time",
-      "detail": "The Pune family court currently has a 9-month backlog. Even for collaborative cases, this affects filing and decree timelines.",
-      "what_you_can_do": "Filing in January (court calendar reset) can reduce this by 2\u20133 weeks."
+      "what_you_can_do": "A pre-agreed co-parenting schedule reduces this significantly."
     },
     {
-      "factor": "Custody Arrangement",
-      "impact": "slower",
-      "days_impact": 8,
-      "icon": "heart",
-      "headline": "Custody terms extend negotiation",
-      "detail": "Cases with children take longer in the negotiation phase \u2014 not because of conflict, but because custody terms require more careful drafting.",
-      "what_you_can_do": "Having a clear initial custody proposal ready for week 1 reduces this by up to 5 days."
-    },
-    {
-      "factor": "No Business Assets",
+      "factor": "No business ownership",
       "impact": "faster",
+      "headline": "No business to value saves time",
+      "detail": "Cases without shared business assets resolve 8 days faster on average.",
       "days_impact": -8,
-      "icon": "check-circle",
-      "headline": "No business valuation needed",
-      "detail": "Cases without business ownership skip the business valuation phase entirely. This removes a major source of delay and cost.",
-      "what_you_can_do": "Nothing required \u2014 this is already working in your favour."
+      "what_you_can_do": null
     },
     {
-      "factor": "Asset Complexity",
-      "impact": "neutral",
-      "days_impact": 3,
-      "icon": "home",
-      "headline": "Single property \u2014 straightforward",
-      "detail": "A single jointly-owned apartment is one of the simpler asset configurations. Property valuation is a one-time event.",
-      "what_you_can_do": "Getting the property pre-appraised before legal proceedings start saves 3\u20135 days."
+      "factor": "Asset complexity",
+      "impact": "slower",
+      "headline": "Property valuation takes time",
+      "detail": "Joint property in Pune requires independent valuation, adding 6 days.",
+      "days_impact": 6,
+      "what_you_can_do": "Your CA has already been assigned to coordinate this."
+    },
+    {
+      "factor": "Moderate urgency",
+      "impact": "faster",
+      "headline": "Your urgency level helps",
+      "detail": "Medium urgency keeps professionals responsive without creating pressure.",
+      "days_impact": -4,
+      "what_you_can_do": null
     }
   ],
-  "confidence_statement": "These estimates are based on 200,000 similar cases. Meera's case falls within the normal distribution \u2014 confidence intervals are standard.",
-  "model_note": "Explanations use SHAP TreeExplainer values translated to plain language. Raw feature contributions available on request."
+  "base_duration_days": 62,
+  "predicted_duration_days": 68
 }
