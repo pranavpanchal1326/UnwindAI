@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TRANSITIONS, VARIANTS } from '@lib/constants/animations'
-import { PROFESSIONAL_STATUS } from '@lib/constants/design'
+import { TRANSITIONS, ANIMATION_VARIANTS } from '@/lib/constants/animations'
+import { PROFESSIONAL_STATUS } from '@/lib/constants/design'
 
 /**
  * @param {Object} props
@@ -23,7 +23,7 @@ function Card({ variant = 'default', status, animate = true, className = '', chi
 
   const Wrapper = animate ? motion.div : 'div'
   const animateProps = animate
-    ? { ...VARIANTS.slideUp, transition: TRANSITIONS.standard }
+    ? { ...ANIMATION_VARIANTS.slideUp, transition: TRANSITIONS.standard }
     : {}
 
   return (

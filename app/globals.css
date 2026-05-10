@@ -1,29 +1,39 @@
-@import "tailwindcss";
+/* ─── UnwindAI v4.0 — Quiet Clarity Design System ─────── */
+/* This is the single source of truth for all design tokens */
+/* Never hardcode any value from this file in any component */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* ── QUIET CLARITY v4.0 TOKENS ─────────────────────────── */
+/* ─── FONT IMPORTS ────────────────────────────────────── */
+/* Fonts are loaded via next/font in layout.jsx           */
+/* These variables are injected at :root by next/font     */
+/* --font-fraunces, --font-general-sans, --font-geist-mono */
+
+/* ─── ROOT DESIGN TOKENS ──────────────────────────────── */
 :root {
-  /* Background system */
-  --bg-base:    #F2F1EE;
-  --bg-surface: #ECEAE6;
-  --bg-raised:  #E8E4DF;
-  --bg-overlay: #E0DBD5;
-  --bg-inverse: #1C1917;
+  /* Background System — Warm Neutral Depth */
+  --bg-base:    #F2F1EE;  /* Mist — app canvas */
+  --bg-surface: #ECEAE6;  /* Cards, panels */
+  --bg-raised:  #E8E4DF;  /* Inputs, tooltips */
+  --bg-overlay: #E0DBD5;  /* Modals, dropdowns */
+  --bg-inverse: #1C1917;  /* Private mode — warm near-black */
 
-  /* Accent — maritime blue — 4 places only */
+  /* Accent System — Maritime Blue — 4 places only */
   --accent:      #3D5A80;
   --accent-soft: #EDE9FE;
   --accent-dim:  #2E4560;
   --accent-text: #2C4A6E;
 
-  /* Text hierarchy */
+  /* Text Scale */
   --text-primary:   #1C1917;
   --text-secondary: #57534E;
   --text-tertiary:  #A8A29E;
   --text-disabled:  #D6D3D1;
   --text-inverse:   #FAFAF9;
 
-  /* Semantic */
+  /* Semantic Colours */
   --success:      #16A34A;
   --success-soft: #DCFCE7;
   --warning:      #D97706;
@@ -31,149 +41,225 @@
   --danger:       #DC2626;
   --danger-soft:  #FEE2E2;
 
-  /* Borders */
+  /* Border System */
   --border-subtle:  #E7E5E4;
   --border-default: #D6D3D1;
   --border-strong:  #A8A29E;
   --border-focus:   #3D5A80;
-
-  /* Typography */
-  --font-fraunces: 'Fraunces', serif;
-  --font-general-sans: 'General Sans', sans-serif;
-  --font-geist-mono: 'Geist Mono', monospace;
 }
 
-/* ── GRAIN TEXTURE ──────────────────────────────────────── */
-/* Section 08: "SVG grain texture at 3% opacity over full
-   canvas via body::before pseudo-element" */
+/* ─── BASE RESET ──────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-general-sans, system-ui, sans-serif);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── GRAIN TEXTURE ───────────────────────────────────── */
+/* From doc Section 08: "3% opacity over full canvas"     */
+/* pointer-events none — never blocks clicks              */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 128px 128px;
 }
 
-/* ── SCROLLBAR — CUSTOM ─────────────────────────────────── */
-/* Section 14: "default browser aesthetics — scrollbars,
-   focus rings, selection all customized" */
-::-webkit-scrollbar {
-  width: 4px;
+/* ─── TYPOGRAPHY DEFAULTS ─────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-general-sans, system-ui, sans-serif);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
 }
+
+p {
+  font-family: var(--font-general-sans, system-ui, sans-serif);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-soft);
+}
+
+/* ─── FOCUS STYLES ────────────────────────────────────── */
+/* Never remove focus ring — accessibility requirement     */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
 ::-webkit-scrollbar-track {
   background: var(--bg-base);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--border-default);
-  border-radius: 2px;
+  border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-strong);
 }
 
-/* ── TEXT SELECTION ─────────────────────────────────────── */
+/* ─── SELECTION ───────────────────────────────────────── */
 ::selection {
-  background: var(--accent-soft);
+  background-color: var(--accent-soft);
   color: var(--accent-text);
 }
 
-/* ── FOCUS VISIBLE ──────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* ── GLOBAL BODY ────────────────────────────────────────── */
-body {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ── TABULAR NUMS ───────────────────────────────────────── */
-/* Section 08: "tabular-nums on all table and list data" */
-table, [data-tabular] {
+/* ─── NUMERIC FORMATTING ──────────────────────────────── */
+/* tabular-nums on all table/list data — Section 14       */
+table, [role="list"], [role="grid"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── MAX-WIDTH PROSE ────────────────────────────────────── */
-/* Section 08: "Body text max-width 65ch globally" */
-.prose {
-  max-width: 65ch;
+/* ─── INPUT RESET ─────────────────────────────────────── */
+input, textarea, select, button {
+  font-family: inherit;
 }
 
-/* ── INTAKE SPECIFIC ────────────────────────────────────── */
-.intake-container {
-  max-width: 52ch;
-  /* Section 08: "Intake screen: 52ch" */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
 }
 
-/* ── LEGAL TEXT ─────────────────────────────────────────── */
-.legal-text {
-  max-width: 72ch;
-  /* Section 08: "Legal disclaimers: 72ch" */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 
-/* ── RESPONSIVE GRIDS ───────────────────────────────────── */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--border-default);
+  border-radius: 1px;
+}
+
+/* ─── RESPONSIVE GRID UTILITIES ───────────────────────── */
+/* Used by dashboard and settlement pages                 */
 @media (min-width: 768px) {
-  .md\\:grid-cols-dashboard {
-    grid-template-columns: 1fr 320px !important;
-  }
-}
-
-/* ── SETTLEMENT SIMULATOR RESPONSIVE ───────────────────── */
-.settlement-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.shap-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.whatif-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-@media (max-width: 768px) {
-  .settlement-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .shap-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .whatif-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* On mobile: risk score appears first */
-  .md\:order-2 {
-    order: -1;
-  }
-
   .md\:grid-cols-dashboard {
+    grid-template-columns: 1fr 320px;
+  }
+  .md\:grid-cols-settlement {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile: stack to single column */
+@media (max-width: 767px) {
+  .md\:grid-cols-dashboard,
+  .md\:grid-cols-settlement {
     grid-template-columns: 1fr;
   }
 }
 
-/* ── FONT VARIANT NUMERIC GLOBAL ─────────────────────────── */
-/* Section 08: tabular-nums on all table/list data */
-[data-tabular] {
-  font-variant-numeric: tabular-nums;
+/* ─── SETTLEMENT GRID ─────────────────────────────────── */
+/* Path cards: 3-up on desktop, stack on mobile           */
+@media (max-width: 767px) {
+  .settlement-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
-/* ── DISCLAIMER FOOTER PADDING ───────────────────────────── */
-/* Ensure content never hides behind fixed footer */
-.settlement-content-bottom {
-  padding-bottom: 80px;
+/* ─── PATH CARDS MOBILE ───────────────────────────────── */
+@media (max-width: 767px) {
+  .path-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── DISCLAIMER FOOTER CLEARANCE ─────────────────────── */
+/* Body needs padding so sticky footer never covers content */
+body {
+  padding-bottom: 56px;
+}
+
+/* ─── REACT FLOW OVERRIDES ────────────────────────────── */
+/* Remove default ReactFlow background, use our tokens    */
+.react-flow {
+  background-color: var(--bg-surface) !important;
+}
+
+.react-flow__background {
+  background-color: var(--bg-surface) !important;
+}
+
+.react-flow__attribution {
+  background: var(--bg-overlay) !important;
+  color: var(--text-tertiary) !important;
+  font-family: var(--font-general-sans) !important;
+  font-size: 10px !important;
+}
+
+/* ─── RECHARTS OVERRIDES ──────────────────────────────── */
+.recharts-text {
+  fill: var(--text-tertiary) !important;
+  font-family: var(--font-general-sans) !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: var(--text-tertiary) !important;
+}
+
+/* ─── PROFESSIONAL PORTAL TAB BORDERS ─────────────────── */
+/* Prevent default browser tab styling                    */
+[role="tab"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── WAGMI / METAMASK MODAL ──────────────────────────── */
+/* Ensure wallet modals appear above everything           */
+[data-rk] {
+  z-index: 10000 !important;
+}
+
+/* ─── PRIVATE MODE ────────────────────────────────────── */
+/* z-index: 9998 — below grain (9999) above all content   */
+[data-private-mode] {
+  z-index: 9998;
 }

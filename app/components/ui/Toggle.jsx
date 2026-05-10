@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TRANSITIONS } from '@lib/constants/animations'
+import { TRANSITIONS } from '@/lib/constants/animations'
 
 /**
  * @param {boolean} props.checked

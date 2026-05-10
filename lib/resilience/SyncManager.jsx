@@ -15,6 +15,25 @@ export function SyncManager() {
     typeof window !== 'undefined' ? navigator.onLine : true
   )
 
+  useEffect(() => {
+    // Check pending writes on mount
+    checkPendingWrites()
+
+    // Sync on window focus
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    // Periodic sync every 2 minutes
+    const interval = setInterval(attemptSync, 120000)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+      clearInterval(interval)
+    }
+  }, [])
 
   function checkPendingWrites() {
     try {
@@ -37,34 +56,12 @@ export function SyncManager() {
     }
   }
 
-  function handleFocus() { attemptSync() }
-  function handleOnline() {
+  const handleFocus = () => attemptSync()
+  const handleOnline = () => {
     setIsOnline(true)
     attemptSync()
   }
-  function handleOffline() { setIsOnline(false) }
-
-  useEffect(() => {
-    // Check pending writes on mount
-    checkPendingWrites()
-
-    // Sync on window focus
-    window.addEventListener('focus', handleFocus)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    // Periodic sync every 2 minutes
-    const interval = setInterval(attemptSync, 120000)
-
-    return () => {
-      window.removeEventListener('focus', handleFocus)
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-      clearInterval(interval)
-    }
-  }, [attemptSync, handleFocus, handleOnline, handleOffline])
-
-
+  const handleOffline = () => setIsOnline(false)
 
   // Show subtle offline indicator only when offline
   // with pending writes

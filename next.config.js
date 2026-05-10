@@ -1,71 +1,93 @@
-const { execSync } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-
-// Copy ONNX models to public directory on startup in development
-// Only copies models needed for What-If (3 models)
-const WHATIF_MODELS = [
-  'outcome_collab_duration.onnx',
-  'outcome_collab_cost.onnx',
-  'risk_scorer.onnx'
-];
-
-if (process.env.NODE_ENV === 'development') {
-  try {
-    const publicModelsDir = path.join(process.cwd(), 'public', 'models');
-    if (!fs.existsSync(publicModelsDir)) {
-      fs.mkdirSync(publicModelsDir, { recursive: true });
-    }
-    WHATIF_MODELS.forEach(model => {
-      const src = path.join(process.cwd(), 'models', model);
-      const dest = path.join(publicModelsDir, model);
-      if (fs.existsSync(src)) {
-        fs.copyFileSync(src, dest);
-      }
-    });
-    console.log('[next.config] ONNX models copied to public/models/');
-  } catch (err) {
-    console.warn('[next.config] Could not copy models:', err.message);
-  }
-}
-
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Webpack: handle ONNX files and externals
-  /*
+
+  // ─── SERVER EXTERNAL PACKAGES ──────────────────────────
+  // These packages must NOT be bundled by webpack
+  // They use native Node.js bindings (.node files)
+  serverExternalPackages: [
+    'onnxruntime-node',
+    '@huggingface/transformers',
+    'sharp'
+  ],
+
+  // ─── WEBPACK CONFIG ────────────────────────────────────
   webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : []),
-        "onnxruntime-node",
-      ]
+    // Browser: stub out server-only packages
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs:     false,
+        path:   false,
+        crypto: false,
+        stream: false,
+        net:    false,
+        tls:    false,
+        'onnxruntime-node': false
+        // onnxruntime-node only runs server-side
+        // Browser uses onnxruntime-web instead
+      }
     }
 
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false
-    };
+    // Handle .node binary files
+    config.module.rules.push({
+      test:   /\.node$/,
+      loader: 'node-loader'
+    })
 
-    // onnxruntime-web uses WASM files for browser ML inference.
-    // asyncWebAssembly must be enabled or the What-If Simulator breaks.
+    // Silence onnxruntime-web WASM warnings
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
+      layers:           true
     }
 
     return config
   },
-  */
 
-
-  // Security headers on every route.
-  /*
-  async headers() {
-    ...
+  // ─── IMAGE DOMAINS ─────────────────────────────────────
+  images: {
+    domains: [
+      'ipfs.w3s.link',
+      'w3s.link',
+      'cloudflare-ipfs.com'
+    ]
   },
-  */
 
+  // ─── HEADERS ───────────────────────────────────────────
+  // Required for WASM + SharedArrayBuffer (onnxruntime-web)
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key:   'Cross-Origin-Opener-Policy',
+            value: 'same-origin'
+          },
+          {
+            key:   'Cross-Origin-Embedder-Policy',
+            value: 'require-corp'
+          }
+        ]
+      },
+      // Allow IPFS gateway images
+      {
+        source: '/_next/image',
+        headers: [
+          {
+            key:   'Cross-Origin-Resource-Policy',
+            value: 'cross-origin'
+          }
+        ]
+      }
+    ]
+  },
+
+  // ─── ENV VARS EXPOSED TO BROWSER ───────────────────────
+  env: {
+    DEMO_MODE: process.env.DEMO_MODE || 'false'
+  }
 }
 
 module.exports = nextConfig

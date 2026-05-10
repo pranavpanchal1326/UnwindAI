@@ -80,8 +80,7 @@ async function runAllTests() {
   // STEP 5: API integration tests (needs server running)
   console.log('\n[STEP 5] Checking if dev server is running...')
   try {
-    // Port 3001 as observed previously
-    const response = await fetch('http://localhost:3001')
+    const response = await fetch('http://localhost:3000')
       .catch(() => null)
 
     if (response) {
@@ -142,7 +141,7 @@ async function runAllTests() {
 ║                                                              ║
 ║   Run order for demo:                                        ║
 ║   1. DEMO_MODE=true npm run dev                             ║
-║   2. Open http://localhost:3001                             ║
+║   2. Open http://localhost:3000                             ║
 ║   3. Follow 5-minute demo script                            ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝

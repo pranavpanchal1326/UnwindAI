@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TRANSITIONS } from '@lib/constants/animations'
+import { TRANSITIONS } from '@/lib/constants/animations'
 
 export function PrivateModeOverlay({ onClose }) {
   return (

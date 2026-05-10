@@ -4,12 +4,10 @@
 
 async function runAutofix() {
   const {
-    existsSync, writeFileSync, readFileSync,
+    existsSync, writeFileSync,
     mkdirSync, copyFileSync,
-    readdirSync
+    readdirSync, readFileSync
   } = await import('fs')
-  const { createRequire } = await import('module');
-  const require = createRequire(import.meta.url);
   const { execSync } = require('child_process')
 
   console.log('\n═══════════════════════════════════════════')
@@ -442,11 +440,13 @@ async function runAutofix() {
   }
 
   Object.entries(DEMO_FILES).forEach(([filePath, content]) => {
-    fix(`Create/Update demo file: ${filePath}`, () => {
-      const dir = filePath.split('/').slice(0, -1).join('/')
-      if (dir && !existsSync(dir)) mkdirSync(dir, { recursive: true })
-      writeFileSync(filePath, JSON.stringify(content, null, 2))
-    })
+    if (!existsSync(filePath)) {
+      fix(`Create demo file: ${filePath}`, () => {
+        const dir = filePath.split('/').slice(0, -1).join('/')
+        if (dir) mkdirSync(dir, { recursive: true })
+        writeFileSync(filePath, JSON.stringify(content, null, 2))
+      })
+    }
   })
 
   // ── FIX 5: Create .env.local if missing ──────────────────

@@ -9,13 +9,12 @@ import { TRANSITIONS, DURATION } from '@/lib/constants/animations'
  * RiskScoreDisplay
  *
  * From document Section 08:
- * "The risk score is not an arc, not a circle, not a progress
- *  bar. It is a single large numeral in Fraunces 300 at 72px.
+ * "The risk score is a single large numeral in Fraunces 300 at 72px.
  *  Proportional numerals. The number's size IS the visualisation."
  *
  * "Below the number in General Sans 400 13px --text-tertiary:
  *  'Lower risk than 71 of 100 similar cases.' One sentence.
- *  No chart. No legend. Nothing else."
+ *  Nothing else."
  */
 export function RiskScoreDisplay({ riskSnapshot, caseId }) {
   const [displayScore, setDisplayScore] = useState(null)

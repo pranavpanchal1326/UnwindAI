@@ -3,8 +3,7 @@
 // Allows: /, /professional/signin, /api/auth/*, public assets
 
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 
 // Routes that never need auth
 const PUBLIC_ROUTES = new Set([
@@ -18,16 +17,11 @@ const PUBLIC_ROUTES = new Set([
 const PROFESSIONAL_ROUTES = ['/professional']
 
 export async function middleware(req) {
-  // DEMO_MODE: Full bypass for demo environment stability
-  // Must be first to avoid any potential crashes in auth logic
-  if (process.env.DEMO_MODE === 'true') {
-    return NextResponse.next()
-  }
-
   const { pathname } = req.nextUrl
-  let res = NextResponse.next()
+  const res = NextResponse.next()
 
-
+  // GAP-10: Instant DEMO_MODE bypass — allow everything
+  if (process.env.DEMO_MODE === 'true') return res
 
   // Public assets — skip immediately
   if (
@@ -57,21 +51,7 @@ export async function middleware(req) {
   }
 
   try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      {
-        cookies: {
-          getAll: () => req.cookies.getAll(),
-          setAll: (cookiesToSet) => {
-            cookiesToSet.forEach(({ name, value, options }) => req.cookies.set(name, value))
-            res = NextResponse.next({ request: req })
-            cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options))
-          },
-        },
-      }
-    )
-
+    const supabase = createMiddlewareClient({ req, res })
     const {
       data: { session }
     } = await Promise.race([

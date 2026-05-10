@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TRANSITIONS, VARIANTS } from '@lib/constants/animations'
+import { TRANSITIONS, ANIMATION_VARIANTS } from '@/lib/constants/animations'
 
 /**
  * @param {boolean} props.isOpen
@@ -93,7 +93,7 @@ export default function Modal({
               p-6 flex flex-col gap-5
               ${className}
             `}
-            {...VARIANTS.modal}
+            {...ANIMATION_VARIANTS.modal}
             transition={TRANSITIONS.standard}
           >
             {title && (

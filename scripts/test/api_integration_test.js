@@ -2,7 +2,7 @@
 // Run after: npm run dev (in separate terminal)
 // Usage: node scripts/test/api_integration_test.js
 
-const BASE = 'http://localhost:3002' // Updated to match current run port
+const BASE = 'http://localhost:3000'
 
 async function post(url, body) {
   const res = await fetch(`${BASE}${url}`, {
@@ -181,13 +181,13 @@ async function runTests() {
     try {
       await post(route.url, route.body)
       const elapsed = Date.now() - start
-      if (elapsed < 500) {
+      if (elapsed < 50) {
         pass(
-          `[J] ${route.url} DEMO response: ${elapsed}ms < 500ms`
+          `[J] ${route.url} DEMO response: ${elapsed}ms < 50ms`
         )
       } else {
         fail(
-          `[J] ${route.url} DEMO too slow: ${elapsed}ms > 500ms`
+          `[J] ${route.url} DEMO too slow: ${elapsed}ms > 50ms`
         )
       }
     } catch (e) {

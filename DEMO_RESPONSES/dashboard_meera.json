@@ -1,4 +1,19 @@
 {
+  "case": {
+    "id": "CASE_MEERA_DEMO_001",
+    "status": "active",
+    "case_type": "divorce",
+    "city": "Mumbai",
+    "day_number": 42,
+    "phase_current": "negotiation"
+  },
+  "profile": {
+    "case_id": "CASE_MEERA_DEMO_001",
+    "risk_score": 34,
+    "risk_label": "Low",
+    "recommended_path": "settlement",
+    "anomaly_flag": false
+  },
   "professionals": [
     {
       "id": "prof_lawyer_001",
@@ -85,5 +100,6 @@
     "score": 34,
     "label": "Low",
     "statement": "Lower risk than 71 of 100 similar cases."
-  }
+  },
+  "tasks": []
 }

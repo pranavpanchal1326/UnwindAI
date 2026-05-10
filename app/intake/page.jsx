@@ -1,37 +1,56 @@
-﻿// app/intake/page.jsx
-// Server component — handles auth check + initial data
-// Renders client intake conversation component
-
+// app/intake/page.jsx
+// Server component — never 'use client'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/users'
 import { IntakeScreen } from './IntakeScreen'
+import { isDemoMode } from '@/lib/demo/demoMode'
 
 export const metadata = {
   title: 'UnwindAI — Tell us what is happening',
-  description: 'Start your case',
-  // Prevent search engine indexing of intake
+  description: 'Begin your case with UnwindAI',
   robots: { index: false, follow: false }
 }
 
 export default async function IntakePage() {
-  // Auth check — redirect if not authenticated
-  const userSession = await getCurrentUser()
+  // Demo mode: always allow access
+  if (isDemoMode()) {
+    return (
+      <IntakeScreen
+        userId="USER_MEERA_DEMO_001"
+        caseId={null}
+        isDemo
+      />
+    )
+  }
 
+  const userSession = await getCurrentUser()
+    .catch(() => null)
+
+  // Auth failed (Supabase down) — show intake anyway
+  // User can complete intake, case saved locally
   if (!userSession) {
-    redirect('/')
+    return (
+      <IntakeScreen
+        userId={null}
+        caseId={null}
+        offlineMode
+      />
+    )
   }
 
   const { dbUser } = userSession
 
-  // If case already exists — redirect to dashboard
-  if (dbUser.case_id && dbUser.onboarding_completed) {
+  // If user has existing case → go to dashboard
+  if (dbUser?.case_id && !dbUser?.onboarding_in_progress) {
     redirect('/dashboard')
   }
 
   return (
     <IntakeScreen
-      userId={dbUser.id}
-      existingCaseId={dbUser.case_id || null}
+      userId={dbUser?.id || null}
+      caseId={dbUser?.case_id || null}
+      isDemo={false}
+      offlineMode={false}
     />
   )
 }

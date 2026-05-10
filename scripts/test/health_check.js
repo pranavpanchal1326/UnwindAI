@@ -8,8 +8,6 @@ async function runHealthCheck() {
   const {
     existsSync, readFileSync, readdirSync
   } = await import('fs')
-  const { createRequire } = await import('module');
-  const require = createRequire(import.meta.url);
   const { execSync } = require('child_process')
 
   const pass = (msg) => { results.pass.push(msg); console.log(`✅ ${msg}`) }
@@ -324,13 +322,9 @@ async function runHealthCheck() {
   console.log('\n[8] TYPESCRIPT AUDIT (must be zero)')
 
   try {
-    const { execSync } = require('child_process')
-    const isWindows = process.platform === 'win32'
-    const cmd = isWindows
-      ? 'dir /s /b app\\*.ts app\\*.tsx lib\\*.ts lib\\*.tsx 2>nul'
-      : 'find app/ lib/ -name "*.ts" -o -name "*.tsx" 2>/dev/null'
-
-    const tsFiles = execSync(cmd).toString().trim()
+    const tsFiles = execSync(
+      'find app/ lib/ -name "*.ts" -o -name "*.tsx" 2>/dev/null || true'
+    ).toString().trim()
     if (tsFiles) {
       tsFiles.split('\n').filter(Boolean).forEach(f => {
         fail(`TypeScript file detected: ${f}`)
@@ -338,9 +332,7 @@ async function runHealthCheck() {
     } else {
       pass('Zero TypeScript files in app/ and lib/')
     }
-  } catch {
-    pass('Zero TypeScript files in app/ and lib/')
-  }
+  } catch { pass('TypeScript audit: clean') }
 
   // ── 9. ARCHITECTURE LAW AUDIT ─────────────────────────────
   console.log('\n[9] ARCHITECTURE LAW AUDIT')

@@ -3,7 +3,7 @@
 // settlement → what-if → vault → professional portal
 // Run: DEMO_MODE=true node scripts/test/demo_flow_test.js
 
-const BASE = 'http://localhost:3002' // Updated to match current run port
+const BASE = 'http://localhost:3000'
 process.env.DEMO_MODE = 'true'
 
 async function post(url, body) {
@@ -67,7 +67,7 @@ async function runDemoFlowTest() {
 
   // ── 1:20 — DASHBOARD DATA ─────────────────────────────────
   await step(
-    'Dashboard: ML prediction loads < 500ms (DEMO_MODE)',
+    'Dashboard: ML prediction loads < 50ms (DEMO_MODE)',
     '1:20',
     async () => {
       const start = Date.now()
@@ -77,8 +77,8 @@ async function runDemoFlowTest() {
       })
       const elapsed = Date.now() - start
       if (status !== 200) throw new Error(`status ${status}`)
-      if (elapsed > 500) {
-        throw new Error(`Too slow: ${elapsed}ms > 500ms`)
+      if (elapsed > 50) {
+        throw new Error(`Too slow: ${elapsed}ms > 50ms`)
       }
       if (!data.paths) throw new Error('Missing paths in response')
       if (!data.risk) throw new Error('Missing risk in response')

@@ -1,368 +1,489 @@
-﻿// app/intake/IntakeScreen.jsx
+// app/intake/IntakeScreen.jsx
 'use client'
+// From doc Section 08 — THE MOST IMPORTANT SCREEN:
+// "Tell me what is happening." — Fraunces italic 300,
+// 32px, --accent colour, centered, max-width 52ch
+//
+// "No chat bubbles. No avatars. No containers.
+//  Words on mist. Like reading a letter."
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 import {
+  PAGE_VARIANTS,
   MESSAGE_VARIANTS,
   QUESTION_VARIANTS,
-  PAGE_VARIANTS,
   TRANSITIONS,
-  INTAKE_LOADING_MESSAGES
+  LOADING_MESSAGES
 } from '@/lib/constants/animations'
-import { IntakeMessage } from './IntakeMessage'
-import { IntakeInput } from './IntakeInput'
-import { IntakeThinkingIndicator } from './IntakeThinkingIndicator'
-import { IntakeCompletion } from './IntakeCompletion'
+import { isDemoMode } from '@/lib/demo/demoMode'
 
-/**
- * IntakeScreen — the most important component in UnwindAI
- *
- * Design rules (non-negotiable):
- * - No chat bubbles. No avatars. No containers.
- * - Words on mist. Like reading a letter.
- * - First message in Fraunces italic 300 32px --accent
- * - All other AI messages in General Sans 400 15px
- * - Input: full-width, no border, 2px bottom line
- * - max-width 52ch on all intake content
- */
-export function IntakeScreen({ userId, existingCaseId }) {
-  const router = useRouter()
+// ─── OPENING MESSAGE ──────────────────────────────────────
+// This exact sentence. This exact style. Always.
+const OPENING_QUESTION = 'Tell me what is happening.'
 
-  // ─── STATE ────────────────────────────────────────────────
-  const [messages, setMessages] = useState([
-    {
-      id: 'opening',
-      role: 'assistant',
-      content: 'Tell me what is happening.',
-      isOpening: true,
-      // Triggers Fraunces italic 300 32px treatment
-      timestamp: new Date().toISOString()
-    }
-  ])
+// ─── DEMO CONVERSATION ────────────────────────────────────
+const DEMO_MESSAGES = [
+  {
+    role:    'assistant',
+    content: OPENING_QUESTION
+  },
+  {
+    role:    'user',
+    content: 'My husband and I have decided to separate. ' +
+      'We have a 6-year-old daughter and a flat in Pune.'
+  },
+  {
+    role:    'assistant',
+    content: 'I am sorry you are going through this. ' +
+      'Thank you for trusting me with this. ' +
+      'How long have you been married?'
+  },
+  {
+    role:    'user',
+    content: 'Eleven years.'
+  },
+  {
+    role:    'assistant',
+    content: 'Is the flat jointly owned, or in one person\'s name?'
+  },
+  {
+    role:    'user',
+    content: 'It is jointly owned. Estimated around 1.3 crore.'
+  },
+  {
+    role:    'assistant',
+    content: 'Understood. Are there any other shared assets — ' +
+      'investments, a business, or vehicles?'
+  }
+]
+
+export function IntakeScreen({
+  userId, caseId, isDemo = false, offlineMode = false
+}) {
+  const [messages, setMessages] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
-  const [caseId, setCaseId] = useState(existingCaseId)
-  const [messageCount, setMessageCount] = useState(0)
-  const [error, setError] = useState(null)
-  const [loadingMessage, setLoadingMessage] = useState(
-    INTAKE_LOADING_MESSAGES[0]
+  const [loadingMsg, setLoadingMsg] = useState('')
+  const [demoIndex, setDemoIndex] = useState(0)
+
+  const bottomRef  = useRef(null)
+  const inputRef   = useRef(null)
+  const sessionId  = useRef(
+    `session_${Date.now()}_${Math.random().toString(36).slice(2)}`
   )
+  const loadingInterval = useRef(null)
 
-  // ─── REFS ─────────────────────────────────────────────────
-  const bottomRef = useRef(null)
-  const inputRef = useRef(null)
-  const messageCountRef = useRef(0)
-  const loadingIntervalRef = useRef(null)
-
-  // ─── SCROLL TO BOTTOM ─────────────────────────────────────
-  const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'end'
-    })
-  }, [])
-
+  // ─── INIT ──────────────────────────────────────────────
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, isThinking, scrollToBottom])
-
-  // ─── FOCUS INPUT ON MOUNT ─────────────────────────────────
-  useEffect(() => {
-    // Small delay — let page animate in first
+    // Opening question appears with slight delay
+    // for theatrical effect
     const timer = setTimeout(() => {
-      inputRef.current?.focus()
-    }, 300)
+      setMessages([{
+        id:      'opening',
+        role:    'assistant',
+        content: OPENING_QUESTION
+      }])
+      // Focus input after opening appears
+      setTimeout(() => inputRef.current?.focus(), 400)
+    }, 600)
+
     return () => clearTimeout(timer)
   }, [])
 
-  // ─── ROTATE LOADING MESSAGES ──────────────────────────────
+  // ─── AUTO-SCROLL ────────────────────────────────────────
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isThinking])
+
+  // ─── LOADING MESSAGE ROTATION ──────────────────────────
   useEffect(() => {
     if (isThinking) {
-      let idx = 0
-      loadingIntervalRef.current = setInterval(() => {
-        idx = (idx + 1) % INTAKE_LOADING_MESSAGES.length
-        setLoadingMessage(INTAKE_LOADING_MESSAGES[idx])
-      }, 2400)
+      const msgs = LOADING_MESSAGES.intake
+      let i = 0
+      setLoadingMsg(msgs[0])
+      loadingInterval.current = setInterval(() => {
+        i = (i + 1) % msgs.length
+        setLoadingMsg(msgs[i])
+      }, 2000)
     } else {
-      clearInterval(loadingIntervalRef.current)
+      clearInterval(loadingInterval.current)
+      setLoadingMsg('')
     }
-    return () => clearInterval(loadingIntervalRef.current)
+    return () => clearInterval(loadingInterval.current)
   }, [isThinking])
 
-  // ─── SEND MESSAGE ─────────────────────────────────────────
+  // ─── SEND MESSAGE ──────────────────────────────────────
   const sendMessage = useCallback(async (text) => {
-    if (!text.trim() || isThinking || isComplete) return
+    const trimmed = text.trim()
+    if (!trimmed || isThinking || isComplete) return
 
-    const userMessage = {
-      id: `user_${Date.now()}`,
-      role: 'user',
-      content: text.trim(),
-      timestamp: new Date().toISOString()
+    const userMsg = {
+      id:      `user_${Date.now()}`,
+      role:    'user',
+      content: trimmed
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages(prev => [...prev, userMsg])
     setInputValue('')
     setIsThinking(true)
-    setError(null)
 
-    // Build conversation history for API
-    const history = messages.map(m => ({
-      role: m.role,
-      content: m.content
-    }))
+    // Demo mode: step through scripted messages
+    if (isDemo) {
+      await new Promise(r => setTimeout(r, 1200))
 
+      const nextIdx = demoIndex + 2
+      // +2 to skip the user message in DEMO_MESSAGES
+      if (nextIdx < DEMO_MESSAGES.length) {
+        const nextMsg = DEMO_MESSAGES[nextIdx]
+        if (nextMsg && nextMsg.role === 'assistant') {
+          setMessages(prev => [...prev, {
+            id:      `demo_${nextIdx}`,
+            role:    'assistant',
+            content: nextMsg.content
+          }])
+          setDemoIndex(nextIdx)
+        }
+      } else {
+        // Demo complete
+        setIsComplete(true)
+      }
+
+      setIsThinking(false)
+      return
+    }
+
+    // Live mode: call intake agent API
     try {
       const response = await fetch('/api/agents/intake', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text.trim(),
-          case_id: caseId,
-          user_id: userId,
-          message_count: messageCountRef.current,
-          conversation_history: history
+          message:    trimmed,
+          session_id: sessionId.current,
+          user_id:    userId
         })
       })
 
-      if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.error || 'Connection error')
+      if (!response.ok) throw new Error('API error')
+
+      const data = await response.json()
+
+      if (data.content) {
+        setMessages(prev => [...prev, {
+          id:      `ai_${Date.now()}`,
+          role:    'assistant',
+          content: data.content
+        }])
       }
 
-      // Check headers for completion
-      const isNowComplete =
-        response.headers.get('X-Intake-Complete') === 'true'
-      const returnedCaseId = response.headers.get('X-Case-Id')
-
-      if (returnedCaseId && !caseId) {
-        setCaseId(returnedCaseId)
-      }
-
-      // Read streamed response
-      let assistantContent = ''
-
-      if (response.body) {
-        // Vercel AI SDK data stream format
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          const chunk = decoder.decode(value, { stream: true })
-          // Parse Vercel AI SDK stream format
-          const lines = chunk.split('\n')
-          for (const line of lines) {
-            if (line.startsWith('0:')) {
-              // Text delta
-              try {
-                const text = JSON.parse(line.slice(2))
-                assistantContent += text
-                // Update last message in real-time for streaming effect
-                setMessages(prev => {
-                  const last = prev[prev.length - 1]
-                  if (last?.role === 'assistant' &&
-                      last?.id === 'streaming') {
-                    return [
-                      ...prev.slice(0, -1),
-                      { ...last, content: assistantContent }
-                    ]
-                  }
-                  return [
-                    ...prev,
-                    {
-                      id: 'streaming',
-                      role: 'assistant',
-                      content: assistantContent,
-                      isOpening: false,
-                      timestamp: new Date().toISOString()
-                    }
-                  ]
-                })
-              } catch (e) {
-                // Ignore parse errors on incomplete chunks
-              }
-            }
-          }
-        }
-      } else {
-        // Non-streaming fallback
-        const data = await response.json()
-        assistantContent = data.content || ''
-      }
-
-      // Finalize streamed message
-      setMessages(prev => {
-        const last = prev[prev.length - 1]
-        if (last?.id === 'streaming') {
-          // Remove profile markers from display text
-          const displayContent = assistantContent
-            .replace(/<!--CASE_PROFILE_START-->[\s\S]*<!--CASE_PROFILE_END-->/g, '')
-            .trim()
-
-          return [
-            ...prev.slice(0, -1),
-            {
-              id: `assistant_${Date.now()}`,
-              role: 'assistant',
-              content: displayContent,
-              isOpening: false,
-              timestamp: new Date().toISOString()
-            }
-          ]
-        }
-        return prev
-      })
-
-      if (isNowComplete) {
+      if (data.complete && data.case_profile) {
         setIsComplete(true)
-        // Small delay then redirect to dashboard
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2500)
       }
-
-      messageCountRef.current += 1
-      setMessageCount(messageCountRef.current)
 
     } catch (err) {
-      setError(err.message)
-      // Remove optimistic message on error
-      setMessages(prev => prev.filter(
-        m => m.id !== 'streaming'
-      ))
+      console.error('[Intake] API failed:', err)
+      // Soft error — encourage retry
+      setMessages(prev => [...prev, {
+        id:      `err_${Date.now()}`,
+        role:    'assistant',
+        content: 'I had trouble with that. Could you try again?',
+        isError: true
+      }])
     } finally {
       setIsThinking(false)
-      // Re-focus input
       setTimeout(() => inputRef.current?.focus(), 100)
     }
-  }, [
-    messages, isThinking, isComplete, caseId,
-    userId, router, scrollToBottom
-  ])
+  }, [isThinking, isComplete, isDemo, demoIndex, userId])
 
-  // ─── KEYBOARD HANDLER ─────────────────────────────────────
-  const handleKeyDown = useCallback((e) => {
+  // ─── KEY HANDLER ────────────────────────────────────────
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage(inputValue)
     }
-  }, [inputValue, sendMessage])
+  }
 
-  // ─── RENDER ───────────────────────────────────────────────
+  // ─── RENDER ─────────────────────────────────────────────
   return (
     <motion.div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: 'var(--bg-base)' }}
+      style={{
+        minHeight:       '100vh',
+        backgroundColor: 'var(--bg-base)',
+        display:         'flex',
+        flexDirection:   'column'
+      }}
       initial="hidden"
       animate="visible"
       variants={PAGE_VARIANTS}
-      aria-label="Intake conversation"
       role="main"
+      aria-label="Intake conversation"
     >
-      {/* Message area — scrollable */}
-      <div
-        className="flex-1 overflow-y-auto"
+      {/* Minimal header */}
+      <header
         style={{
-          paddingTop: '20vh',
-          paddingBottom: '40px'
+          padding:      '20px 24px',
+          borderBottom: '1px solid var(--border-subtle)'
         }}
-        aria-live="polite"
-        aria-label="Conversation"
+      >
+        <span
+          style={{
+            fontFamily:    'var(--font-fraunces, Georgia, serif)',
+            fontSize:      '15px',
+            fontWeight:    400,
+            color:         'var(--text-primary)',
+            letterSpacing: '-0.01em'
+          }}
+        >
+          UnwindAI
+        </span>
+      </header>
+
+      {/* Message area */}
+      <div
+        style={{
+          flex:      1,
+          overflowY: 'auto',
+          padding:   '48px 24px 120px'
+        }}
       >
         <div
-          className="mx-auto px-6"
-          style={{ maxWidth: '52ch' }}
+          style={{
+            maxWidth:     '52ch', // From doc Section 08
+            margin:       '0 auto',
+            display:      'flex',
+            flexDirection: 'column',
+            gap:           '32px'
+          }}
         >
           <AnimatePresence mode="popLayout">
-            {messages.map((msg, index) => (
-              <IntakeMessage
+            {messages.map(msg => (
+              <motion.div
                 key={msg.id}
-                message={msg}
-                isFirst={index === 0}
                 variants={
-                  index === 0
+                  msg.role === 'assistant'
                     ? QUESTION_VARIANTS
                     : MESSAGE_VARIANTS
                 }
-              />
+                initial="hidden"
+                animate="visible"
+                layout
+              >
+                {msg.role === 'assistant' ? (
+                  /* AI message — plain text on mist */
+                  /* From doc: "No chat bubbles. No avatars." */
+                  <p
+                    style={{
+                      fontFamily: msg.content === OPENING_QUESTION
+                        ? 'var(--font-fraunces, Georgia, serif)'
+                        : 'var(--font-general-sans, system-ui, sans-serif)',
+                      fontSize:    msg.content === OPENING_QUESTION
+                        ? '32px'  // From doc: 32px
+                        : '18px',
+                      fontWeight:  300,
+                      fontStyle:   msg.content === OPENING_QUESTION
+                        ? 'italic'  // From doc: italic
+                        : 'normal',
+                      color: msg.content === OPENING_QUESTION
+                        ? 'var(--accent)'  // From doc: --accent
+                        : 'var(--text-primary)',
+                      lineHeight:    1.4,
+                      letterSpacing: msg.content === OPENING_QUESTION
+                        ? '-0.02em' : '-0.01em',
+                      margin: 0
+                    }}
+                  >
+                    {msg.content}
+                  </p>
+                ) : (
+                  /* User message — slightly receded */
+                  <p
+                    style={{
+                      fontFamily:    'var(--font-general-sans, system-ui, sans-serif)',
+                      fontSize:      '16px',
+                      fontWeight:    400,
+                      color:         'var(--text-secondary)',
+                      lineHeight:    1.6,
+                      margin:        0,
+                      paddingLeft:   '16px',
+                      borderLeft:    '2px solid var(--border-subtle)'
+                    }}
+                  >
+                    {msg.content}
+                  </p>
+                )}
+              </motion.div>
             ))}
           </AnimatePresence>
 
           {/* Thinking indicator */}
           <AnimatePresence>
             {isThinking && (
-              <IntakeThinkingIndicator
-                loadingMessage={loadingMessage}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Completion state */}
-          <AnimatePresence>
-            {isComplete && (
-              <IntakeCompletion />
-            )}
-          </AnimatePresence>
-
-          {/* Error state */}
-          <AnimatePresence>
-            {error && (
               <motion.p
-                key="error"
+                key="thinking"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={TRANSITIONS.fast}
                 style={{
-                  color: 'var(--danger)',
-                  fontSize: '13px',
-                  marginTop: '16px',
-                  fontFamily: 'var(--font-general-sans)'
+                  fontFamily: 'var(--font-general-sans, system-ui, sans-serif)',
+                  fontSize:   '14px',
+                  fontWeight: 400,
+                  fontStyle:  'italic',
+                  color:      'var(--text-tertiary)',
+                  margin:     0
                 }}
-                role="alert"
+                aria-live="polite"
+                aria-label={loadingMsg}
               >
-                {error}
+                {loadingMsg}
               </motion.p>
             )}
           </AnimatePresence>
 
-          {/* Scroll anchor */}
-          <div ref={bottomRef} style={{ height: '1px' }} />
+          {/* Complete state */}
+          <AnimatePresence>
+            {isComplete && (
+              <motion.div
+                key="complete"
+                variants={MESSAGE_VARIANTS}
+                initial="hidden"
+                animate="visible"
+                style={{
+                  padding:         '24px',
+                  backgroundColor: 'var(--bg-surface)',
+                  borderRadius:    '12px',
+                  boxShadow:
+                    '0 1px 3px rgba(0,0,0,0.06),' +
+                    '0 4px 16px rgba(0,0,0,0.04)'
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: 'var(--font-fraunces, Georgia, serif)',
+                    fontSize:   '18px',
+                    fontWeight: 300,
+                    color:      'var(--text-primary)',
+                    margin:     '0 0 8px'
+                  }}
+                >
+                  Thank you.
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-general-sans, system-ui, sans-serif)',
+                    fontSize:   '14px',
+                    color:      'var(--text-secondary)',
+                    lineHeight: 1.6,
+                    margin:     '0 0 20px'
+                  }}
+                >
+                  Your case is being set up.
+                  Your professional team will be matched shortly.
+                </p>
+                <Link
+                  href="/dashboard"
+                  style={{
+                    display:         'inline-block',
+                    padding:         '12px 24px',
+                    backgroundColor: 'var(--accent)',
+                    color:           'var(--text-inverse)',
+                    borderRadius:    '8px',
+                    fontFamily:      'var(--font-general-sans, system-ui, sans-serif)',
+                    fontSize:        '14px',
+                    fontWeight:      500,
+                    textDecoration:  'none'
+                  }}
+                >
+                  Go to your dashboard →
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div ref={bottomRef} aria-hidden="true" />
         </div>
       </div>
 
-      {/* Input area — fixed to bottom */}
+      {/* Input area — fixed at bottom */}
       {!isComplete && (
         <div
           style={{
-            position: 'sticky',
-            bottom: 0,
+            position:        'fixed',
+            bottom:          0,
+            left:            0,
+            right:           0,
             backgroundColor: 'var(--bg-base)',
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-            borderTop: 'none'
+            borderTop:       '1px solid var(--border-subtle)',
+            padding:         '16px 24px',
+            paddingBottom:   'max(16px, env(safe-area-inset-bottom))'
           }}
         >
           <div
-            className="mx-auto px-6"
-            style={{ maxWidth: '52ch' }}
+            style={{
+              maxWidth: '52ch',
+              margin:   '0 auto',
+              position: 'relative'
+            }}
           >
-            <IntakeInput
+            <textarea
               ref={inputRef}
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              onSend={() => sendMessage(inputValue)}
-              disabled={isThinking}
               placeholder={
-                isThinking
-                  ? ''
-                  : 'Share what is on your mind...'
+                messages.length <= 1
+                  ? 'Type here...'
+                  : 'Your response...'
               }
+              disabled={isThinking}
+              rows={1}
+              style={{
+                width:           '100%',
+                minHeight:       '48px',
+                maxHeight:       '120px',
+                resize:          'none',
+                backgroundColor: 'var(--bg-raised)',
+                border:          'none',
+                borderBottom:    '2px solid var(--border-default)',
+                borderRadius:    0,
+                padding:         '12px 48px 12px 0',
+                fontFamily:      'var(--font-general-sans, system-ui, sans-serif)',
+                fontSize:        '16px',
+                fontWeight:      400,
+                color:           'var(--text-primary)',
+                lineHeight:      1.5,
+                outline:         'none',
+                boxSizing:       'border-box',
+                caretColor:      'var(--accent)',
+                overflowY:       'auto'
+              }}
+              onFocus={e => {
+                e.target.style.borderBottomColor = 'var(--border-focus)'
+              }}
+              onBlur={e => {
+                e.target.style.borderBottomColor = 'var(--border-default)'
+              }}
+              aria-label="Your response"
+              aria-describedby="intake-hint"
             />
+            <p
+              id="intake-hint"
+              style={{
+                position:   'absolute',
+                right:      0,
+                bottom:     '14px',
+                fontFamily: 'var(--font-general-sans, system-ui, sans-serif)',
+                fontSize:   '11px',
+                color:      'var(--text-disabled)',
+                margin:     0
+              }}
+              aria-hidden="true"
+            >
+              ↵ Send
+            </p>
           </div>
         </div>
       )}
